@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#0A1628"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Payel Shop</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0A1628;color:#F0F0F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+
+/* Login */
+#loginScreen{position:fixed;inset:0;background:#0A1628;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;padding:24px;}
+#loginScreen h2{color:#FFD700;font-size:24px;font-weight:800;text-align:center;}
+#loginScreen p{color:#888;font-size:13px;text-align:center;}
+.login-input{width:100%;max-width:300px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:15px;color:#fff;font-size:16px;outline:none;}
+.login-input:focus{border-color:#FFD700;}
+#loginError{color:#E74C3C;font-size:13px;display:none;}
+.login-btn{width:100%;max-width:300px;background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:14px;padding:15px;color:#0A1628;font-size:16px;font-weight:800;cursor:pointer;}
+.view-btn{width:100%;max-width:300px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:13px;color:#888;font-size:14px;cursor:pointer;}
+
+/* Notif */
+#notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1E8449;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;}
+#notifErr{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#C0392B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0A1628,#1A2F4A);padding:14px 16px;border-bottom:1px solid #1E3A5F;position:sticky;top:0;z-index:10;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.header h1{font-size:18px;font-weight:800;color:#FFD700;}
+.header-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.hbtn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#888;font-size:11px;font-weight:700;cursor:pointer;}
+.lock-btn{background:rgba(255,255,255,0.06);border:none;border-radius:8px;padding:6px 12px;color:#888;font-size:12px;cursor:pointer;}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px;}
+.stat-box{background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:10px 6px;text-align:center;}
+.stat-val{font-size:16px;font-weight:800;color:#FFD700;}
+.stat-lbl{font-size:10px;color:#666;margin-top:2px;}
+
+/* Tabs */
+.tabs{padding:0 12px 8px;}
+.tab-bar{display:flex;background:#0F1E35;border-radius:12px;padding:4px;gap:4px;overflow-x:auto;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:#888;transition:all 0.2s;white-space:nowrap;}
+
+/* Cards */
+.content-area{padding:0 12px 90px;}
+.product-card{background:#0F1E35;border:1px solid #1E3A5F;border-radius:16px;margin-bottom:10px;overflow:hidden;}
+.product-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
+.product-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.product-info{flex:1;}
+.product-name{font-size:15px;font-weight:700;color:#F0F0F0;}
+.product-cat{font-size:11px;color:#888;margin-top:2px;}
+.product-price{font-size:13px;color:#FFD700;font-weight:700;margin-top:2px;}
+.stock-badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700;}
+.stock-ok{background:rgba(39,174,96,0.2);color:#27AE60;border:1px solid #27AE60;}
+.stock-low{background:rgba(231,76,60,0.2);color:#E74C3C;border:1px solid #E74C3C;}
+.stock-zero{background:rgba(150,150,150,0.2);color:#aaa;border:1px solid #555;}
+
+.sale-card{background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.sale-date{background:#1A3050;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#FFD700;text-align:center;min-width:52px;flex-shrink:0;}
+.sale-info{flex:1;}
+.sale-product{font-size:14px;font-weight:700;}
+.sale-detail{font-size:12px;color:#888;margin-top:2px;}
+.sale-amount{font-size:15px;font-weight:800;color:#27AE60;}
+.sale-profit{font-size:11px;color:#3498DB;margin-top:1px;text-align:right;}
+
+/* Date filter */
+.date-dropdowns{display:flex;gap:8px;padding:8px 12px 4px;}
+.date-select{flex:1;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:10px 8px;color:#F0F0F0;font-size:13px;font-weight:600;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;}
+.date-select:focus{border-color:#FFD700;}
+
+/* Search */
+.search-wrap{padding:6px 12px 4px;}
+.search-wrap-inner{position:relative;}
+.search-input{width:100%;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:11px 16px 11px 40px;color:#F0F0F0;font-size:14px;outline:none;}
+.search-input:focus{border-color:#FFD700;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+
+/* Add btn */
+.add-btn{width:100%;background:rgba(255,215,0,0.08);border:1px dashed #FFD700;border-radius:14px;padding:14px;color:#FFD700;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:flex-end;justify-content:center;z-index:100;}
+.modal{background:#0F1E35;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:16px;color:#FFD700;}
+.modal label{font-size:12px;color:#888;display:block;margin-bottom:4px;margin-top:12px;}
+.modal input,.modal select,.modal textarea{width:100%;background:#0A1628;border:1px solid #1E3A5F;border-radius:10px;padding:12px;color:#F0F0F0;font-size:14px;outline:none;}
+.modal textarea{resize:none;height:60px;}
+.modal input:focus,.modal select:focus{border-color:#FFD700;}
+.modal-btns{display:flex;gap:10px;margin-top:16px;}
+.btn-cancel{flex:1;background:#1A2F4A;border:none;border-radius:10px;padding:12px;color:#888;font-size:14px;cursor:pointer;}
+.btn-primary{flex:2;background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:10px;padding:12px;color:#0A1628;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-danger{flex:1;background:rgba(231,76,60,0.2);border:1px solid #E74C3C;border-radius:10px;padding:12px;color:#E74C3C;font-size:14px;cursor:pointer;}
+
+/* Preview box */
+.calc-box{background:#080F1E;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-top:12px;}
+.calc-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+.calc-row .lbl{color:#888;}
+.calc-row .val{font-weight:600;}
+.calc-row .green{color:#27AE60;}
+.calc-row .red{color:#E74C3C;}
+.calc-row .gold{color:#FFD700;font-weight:800;}
+
+/* Due badge */
+.due-badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700;background:rgba(230,126,34,0.2);color:#E67E22;border:1px solid #E67E22;}
+.paid-badge-green{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700;background:rgba(39,174,96,0.2);color:#27AE60;border:1px solid #27AE60;}
+
+/* Report grid */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.rep-box{background:#080F1E;border-radius:10px;padding:10px;text-align:center;}
+.rep-val{font-size:18px;font-weight:800;color:#FFD700;}
+.rep-lbl{font-size:10px;color:#888;margin-top:2px;}
+
+select option{background:#0F1E35;}
+</style>
+</head>
+<body>
+
+<div id="notif"></div>
+<div id="notifErr"></div>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div style="font-size:60px;line-height:1">💡</div>
+  <h2>Payel Shop</h2>
+  <p>Lights & Accessories Tracker</p>
+  <div style="position:relative;width:100%;max-width:300px;">
+    <input type="password" class="login-input" id="passInput" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()" style="padding-right:48px;"/>
+    <button onclick="toggleEye('passInput','eyeBtn')" id="eyeBtn" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:18px;cursor:pointer;">👁️</button>
+  </div>
+  <div id="loginError">❌ Wrong Password!</div>
+  <button class="login-btn" onclick="tryLogin()">🔐 Login</button>
+  <button class="view-btn" onclick="viewOnly()">👁 View Only</button>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ── FIREBASE CONFIG — Replace with Payel's own config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyBji9ny612NL9KLvLvnA-Uc8OsKZOklBxI",
+  authDomain: "payel-shop.firebaseapp.com",
+  databaseURL: "https://payel-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "payel-shop",
+  storageBucket: "payel-shop.firebasestorage.app",
+  messagingSenderId: "858295307749",
+  appId: "1:858295307749:web:aac929ac2e84314b72330c",
+  measurementId: "G-P3RTRJDP71"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ── State ──
+let isEditor = sessionStorage.getItem("shopAuth") === "editor";
+let isViewer = sessionStorage.getItem("shopAuth") === "viewer";
+let PASS = "payel123";
+let passLoaded = false;
+let currentTab = "products";
+let products = [];
+let sales = [];
+let dues = [];
+let selectedYear = new Date().getFullYear();
+let selectedMonthNum = new Date().getMonth() + 1;
+
+// modals
+let addProductOpen = false;
+let editProduct = null;
+let addSaleOpen = false;
+let editSale = null;
+let addDueOpen = false;
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CATEGORIES = ["LED Strip","Bulb","Ceiling Light","Wall Light","Spotlight","Chandelier","Outdoor Light","Switch & Socket","Cable & Wire","Accessories","Other"];
+const CAT_ICONS = {"LED Strip":"💡","Bulb":"💡","Ceiling Light":"🔆","Wall Light":"🕯️","Spotlight":"🔦","Chandelier":"✨","Outdoor Light":"🌟","Switch & Socket":"🔌","Cable & Wire":"🔋","Accessories":"🛒","Other":"📦"};
+
+// ── Firebase Password ──
+db.ref("shop_settings/password").on("value", snap => {
+  const v = snap.val();
+  if (v) PASS = v;
+  passLoaded = true;
+});
+setTimeout(() => { passLoaded = true; }, 3000);
+
+// ── Firebase Data ──
+db.ref("shop_products").on("value", snap => {
+  products = snap.val() ? Object.values(snap.val()) : [];
+  renderAll();
+});
+db.ref("shop_sales").on("value", snap => {
+  sales = snap.val() ? Object.values(snap.val()) : [];
+  renderAll();
+});
+db.ref("shop_dues").on("value", snap => {
+  dues = snap.val() ? Object.values(snap.val()) : [];
+  renderAll();
+});
+
+if (isEditor || isViewer) {
+  document.getElementById("loginScreen").style.display = "none";
+}
+
+function tryLogin() {
+  const v = document.getElementById("passInput").value;
+  if (v === PASS) {
+    isEditor = true;
+    sessionStorage.setItem("shopAuth","editor");
+    document.getElementById("loginScreen").style.display = "none";
+    renderAll();
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+function viewOnly() {
+  isViewer = true;
+  sessionStorage.setItem("shopAuth","viewer");
+  document.getElementById("loginScreen").style.display = "none";
+  renderAll();
+}
+function logout() {
+  sessionStorage.removeItem("shopAuth");
+  isEditor = false; isViewer = false;
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("passInput").value = "";
+  document.getElementById("loginError").style.display = "none";
+}
+function checkEditor() {
+  if (!isEditor) { showErr("View only mode!"); return false; }
+  return true;
+}
+function toggleEye(inputId, btnId) {
+  const el = document.getElementById(inputId);
+  el.type = el.type === "password" ? "text" : "password";
+}
+
+function showNotif(msg) {
+  const el = document.getElementById("notif");
+  el.textContent = msg; el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; }, 2500);
+}
+function showErr(msg) {
+  const el = document.getElementById("notifErr");
+  el.textContent = "❌ " + msg; el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; }, 2500);
+}
+
+function getSelectedMonth() {
+  return `${selectedYear}-${String(selectedMonthNum).padStart(2,"0")}`;
+}
+function getMonthLabel(key) {
+  if (!key) return "";
+  const [y, m] = key.split("-");
+  return `${MONTHS[parseInt(m)-1]} ${y}`;
+}
+
+// ── TABS ──
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    const active = b.dataset.tab === t;
+    b.style.background = active ? "#FFD700" : "transparent";
+    b.style.color = active ? "#0A1628" : "#888";
+  });
+  renderAll();
+}
+
+// ── PRODUCT FUNCTIONS ──
+function openAddProduct() {
+  if (!checkEditor()) return;
+  addProductOpen = true;
+  setTimeout(() => {
+    const fields = ["pName","pCategory","pBuyPrice","pSellPrice","pStock","pUnit","pBarcode","pNotes"];
+    fields.forEach(id => { const el = document.getElementById(id); if(el) el.value = id==="pCategory"?"LED Strip":id==="pUnit"?"pcs":""; });
+    updateProductCalc();
+  }, 50);
+  renderAll();
+}
+function closeProductModal() {
+  addProductOpen = false; editProduct = null; renderAll();
+}
+function doAddProduct() {
+  const name = document.getElementById("pName").value.trim();
+  const category = document.getElementById("pCategory").value;
+  const buyPrice = parseFloat(document.getElementById("pBuyPrice").value) || 0;
+  const sellPrice = parseFloat(document.getElementById("pSellPrice").value) || 0;
+  const stock = parseInt(document.getElementById("pStock").value) || 0;
+  const unit = document.getElementById("pUnit").value || "pcs";
+  const barcode = document.getElementById("pBarcode").value.trim();
+  const notes = document.getElementById("pNotes").value.trim();
+  if (!name) { showErr("Product name required!"); return; }
+  if (sellPrice <= 0) { showErr("Selling price required!"); return; }
+  const id = Date.now().toString();
+  const product = { id, name, category, buyPrice, sellPrice, stock, unit, barcode, notes, createdAt: new Date().toISOString() };
+  db.ref(`shop_products/${id}`).set(product);
+  addProductOpen = false;
+  showNotif(`✅ ${name} added!`);
+  renderAll();
+}
+function openEditProduct(id) {
+  if (!checkEditor()) return;
+  editProduct = products.find(p => p.id === id);
+  if (!editProduct) return;
+  setTimeout(() => {
+    document.getElementById("epName").value = editProduct.name || "";
+    document.getElementById("epCategory").value = editProduct.category || "LED Strip";
+    document.getElementById("epBuyPrice").value = editProduct.buyPrice || "";
+    document.getElementById("epSellPrice").value = editProduct.sellPrice || "";
+    document.getElementById("epStock").value = editProduct.stock || 0;
+    document.getElementById("epUnit").value = editProduct.unit || "pcs";
+    document.getElementById("epBarcode").value = editProduct.barcode || "";
+    document.getElementById("epNotes").value = editProduct.notes || "";
+    updateEditProductCalc();
+  }, 50);
+  renderAll();
+}
+function doEditProduct() {
+  const name = document.getElementById("epName").value.trim();
+  const category = document.getElementById("epCategory").value;
+  const buyPrice = parseFloat(document.getElementById("epBuyPrice").value) || 0;
+  const sellPrice = parseFloat(document.getElementById("epSellPrice").value) || 0;
+  const stock = parseInt(document.getElementById("epStock").value) || 0;
+  const unit = document.getElementById("epUnit").value || "pcs";
+  const barcode = document.getElementById("epBarcode").value.trim();
+  const notes = document.getElementById("epNotes").value.trim();
+  if (!name) { showErr("Name required!"); return; }
+  const updated = { ...editProduct, name, category, buyPrice, sellPrice, stock, unit, barcode, notes };
+  db.ref(`shop_products/${editProduct.id}`).set(updated);
+  editProduct = null;
+  showNotif("✅ Product updated!");
+  renderAll();
+}
+function deleteProduct(id) {
+  if (!confirm("Delete this product?")) return;
+  db.ref(`shop_products/${id}`).remove();
+  showNotif("🗑️ Product deleted");
+}
+function updateProductCalc() {
+  const buy = parseFloat(document.getElementById("pBuyPrice")?.value) || 0;
+  const sell = parseFloat(document.getElementById("pSellPrice")?.value) || 0;
+  const profit = sell - buy;
+  const margin = buy > 0 ? ((profit / sell) * 100).toFixed(1) : 0;
+  const el = document.getElementById("productCalcBox");
+  if (el) el.innerHTML = `
+    <div class="calc-row"><span class="lbl">Buy Price</span><span class="val">AED ${buy.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Sell Price</span><span class="val">AED ${sell.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Profit/Unit</span><span class="val ${profit>=0?'green':'red'}">${profit>=0?'+':''}AED ${profit.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Margin</span><span class="val gold">${margin}%</span></div>`;
+}
+function updateEditProductCalc() {
+  const buy = parseFloat(document.getElementById("epBuyPrice")?.value) || 0;
+  const sell = parseFloat(document.getElementById("epSellPrice")?.value) || 0;
+  const profit = sell - buy;
+  const margin = buy > 0 ? ((profit / sell) * 100).toFixed(1) : 0;
+  const el = document.getElementById("editProductCalcBox");
+  if (el) el.innerHTML = `
+    <div class="calc-row"><span class="lbl">Buy Price</span><span class="val">AED ${buy.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Sell Price</span><span class="val">AED ${sell.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Profit/Unit</span><span class="val ${profit>=0?'green':'red'}">${profit>=0?'+':''}AED ${profit.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Margin</span><span class="val gold">${margin}%</span></div>`;
+}
+function adjustStock(id, delta) {
+  if (!checkEditor()) return;
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const newStock = Math.max(0, (p.stock || 0) + delta);
+  db.ref(`shop_products/${id}/stock`).set(newStock);
+  showNotif(`Stock: ${newStock} ${p.unit || 'pcs'}`);
+}
+
+// ── SALE FUNCTIONS ──
+function openAddSale() {
+  if (!checkEditor()) return;
+  addSaleOpen = true;
+  setTimeout(() => {
+    document.getElementById("sDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("sProduct").value = "";
+    document.getElementById("sQty").value = "1";
+    document.getElementById("sDiscount").value = "0";
+    document.getElementById("sPayment").value = "cash";
+    document.getElementById("sCustomer").value = "";
+    document.getElementById("sSaleNotes").value = "";
+    updateSaleCalc();
+  }, 50);
+  renderAll();
+}
+function closeSaleModal() {
+  addSaleOpen = false; editSale = null; renderAll();
+}
+function updateSaleCalc() {
+  const pid = document.getElementById("sProduct")?.value;
+  const qty = parseInt(document.getElementById("sQty")?.value) || 1;
+  const discount = parseFloat(document.getElementById("sDiscount")?.value) || 0;
+  const product = products.find(p => p.id === pid);
+  const el = document.getElementById("saleCalcBox");
+  if (!el) return;
+  if (!product) { el.innerHTML = `<div style="color:#555;font-size:12px;text-align:center;">Select a product to see details</div>`; return; }
+  const subtotal = product.sellPrice * qty;
+  const discountAmt = discount;
+  const total = Math.max(0, subtotal - discountAmt);
+  const cost = (product.buyPrice || 0) * qty;
+  const profit = total - cost;
+  el.innerHTML = `
+    <div class="calc-row"><span class="lbl">Unit Price</span><span class="val">AED ${product.sellPrice.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Qty × ${qty}</span><span class="val">AED ${subtotal.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Discount</span><span class="val red">- AED ${discountAmt.toFixed(2)}</span></div>
+    <div style="border-top:1px solid #1E3A5F;margin:6px 0;"></div>
+    <div class="calc-row"><span class="lbl" style="color:#FFD700;font-weight:700;">Total</span><span class="val gold">AED ${total.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Profit</span><span class="val ${profit>=0?'green':'red'}">${profit>=0?'+':''}AED ${profit.toFixed(2)}</span></div>
+    <div class="calc-row"><span class="lbl">Stock Left</span><span class="val">${(product.stock||0) - qty >= 0 ? (product.stock||0)-qty : '<span style="color:#E74C3C">⚠️ Insufficient</span>'} ${product.unit||'pcs'}</span></div>`;
+}
+function doAddSale() {
+  const pid = document.getElementById("sProduct").value;
+  const qty = parseInt(document.getElementById("sQty").value) || 1;
+  const discount = parseFloat(document.getElementById("sDiscount").value) || 0;
+  const payment = document.getElementById("sPayment").value;
+  const customer = document.getElementById("sCustomer").value.trim();
+  const notes = document.getElementById("sSaleNotes").value.trim();
+  const dateVal = document.getElementById("sDate").value;
+  const product = products.find(p => p.id === pid);
+  if (!product) { showErr("Select a product!"); return; }
+  if (qty <= 0) { showErr("Qty must be > 0"); return; }
+  const subtotal = product.sellPrice * qty;
+  const total = Math.max(0, subtotal - discount);
+  const cost = (product.buyPrice || 0) * qty;
+  const profit = total - cost;
+  const saleDate = dateVal || new Date().toISOString().split("T")[0];
+  const monthKey = saleDate.slice(0, 7);
+  const id = Date.now().toString();
+  const sale = { id, productId: product.id, productName: product.name, category: product.category, qty, unitPrice: product.sellPrice, discount, total, cost, profit, payment, customer, notes, date: saleDate, monthKey };
+  db.ref(`shop_sales/${id}`).set(sale);
+  // Update stock
+  const newStock = Math.max(0, (product.stock || 0) - qty);
+  db.ref(`shop_products/${product.id}/stock`).set(newStock);
+  // If due/credit — add to dues
+  if (payment === "due") {
+    const dueId = Date.now().toString() + "d";
+    db.ref(`shop_dues/${dueId}`).set({ id: dueId, saleId: id, customer: customer || "Unknown", amount: total, paid: 0, date: saleDate, monthKey, status: "pending", notes });
+  }
+  addSaleOpen = false;
+  showNotif(`✅ Sale saved! AED ${total.toFixed(2)}`);
+  renderAll();
+}
+function deleteSale(id) {
+  if (!confirm("Delete this sale?")) return;
+  db.ref(`shop_sales/${id}`).remove();
+  showNotif("🗑️ Sale deleted");
+}
+
+// ── DUE FUNCTIONS ──
+function markDuePaid(id) {
+  if (!checkEditor()) return;
+  const due = dues.find(d => d.id === id);
+  if (!due) return;
+  db.ref(`shop_dues/${id}/status`).set("paid");
+  db.ref(`shop_dues/${id}/paid`).set(due.amount);
+  showNotif("✅ Marked as Paid!");
+}
+function deleteDue(id) {
+  if (!confirm("Delete this due record?")) return;
+  db.ref(`shop_dues/${id}`).remove();
+}
+
+// ── CHANGE PASSWORD ──
+function openChangePass() {
+  if (!checkEditor()) return;
+  document.getElementById("cpModal").style.display = "flex";
+}
+function closeChangePass() {
+  document.getElementById("cpModal").style.display = "none";
+}
+function doChangePass() {
+  const old = document.getElementById("cpOld").value;
+  const n = document.getElementById("cpNew").value;
+  const c = document.getElementById("cpConfirm").value;
+  if (old !== PASS) { document.getElementById("cpError").textContent = "Current password wrong!"; document.getElementById("cpError").style.display = "block"; return; }
+  if (n.length < 4) { document.getElementById("cpError").textContent = "Min 4 characters!"; document.getElementById("cpError").style.display = "block"; return; }
+  if (n !== c) { document.getElementById("cpError").textContent = "Passwords don't match!"; document.getElementById("cpError").style.display = "block"; return; }
+  db.ref("shop_settings/password").set(n);
+  PASS = n;
+  closeChangePass();
+  showNotif("✅ Password changed!");
+}
+
+// ── BACKUP / RESTORE ──
+function backupData() {
+  const data = { version: 1, exportedAt: new Date().toISOString(), products, sales, dues };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `payel-shop-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showNotif("💾 Backup downloaded!");
+}
+function restoreData() {
+  document.getElementById("restoreInput").value = "";
+  document.getElementById("restoreInput").click();
+}
+function handleRestore(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.products || !data.sales) { showErr("Invalid backup file!"); return; }
+      if (!confirm("This will replace ALL data. Continue?")) return;
+      const pObj = {}; data.products.forEach(p => { pObj[p.id] = p; });
+      const sObj = {}; data.sales.forEach(s => { sObj[s.id] = s; });
+      db.ref("shop_products").set(Object.keys(pObj).length ? pObj : null);
+      db.ref("shop_sales").set(Object.keys(sObj).length ? sObj : null);
+      if (data.dues) { const dObj = {}; data.dues.forEach(d => { dObj[d.id] = d; }); db.ref("shop_dues").set(Object.keys(dObj).length ? dObj : null); }
+      showNotif("✅ Restore successful!");
+    } catch(err) { showErr("Could not read file!"); }
+  };
+  reader.readAsText(file);
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  const monthSales = sales.filter(s => s.monthKey === getSelectedMonth());
+  if (!monthSales.length) { showErr("No sales this month!"); return; }
+  const rows = [["Date","Product","Category","Qty","Unit Price","Discount","Total","Cost","Profit","Payment","Customer","Notes"]];
+  monthSales.forEach(s => {
+    rows.push([s.date, s.productName, s.category||"", s.qty, s.unitPrice, s.discount||0, s.total, s.cost||0, s.profit||0, s.payment, s.customer||"", s.notes||""]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `sales-${getSelectedMonth()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showNotif("📥 CSV downloaded!");
+}
+
+// ── RENDER ──
+let chartInst = null;
+function renderAll() {
+  if (!isEditor && !isViewer) return;
+  renderStats();
+  renderTabs();
+  renderDateDropdowns();
+  if (currentTab === "products") renderProducts();
+  else if (currentTab === "sales") renderSales();
+  else if (currentTab === "dues") renderDues();
+  else if (currentTab === "report") renderReport();
+}
+
+function renderStats() {
+  const monthSales = sales.filter(s => s.monthKey === getSelectedMonth());
+  const totalRevenue = monthSales.reduce((a, s) => a + (s.total || 0), 0);
+  const totalProfit = monthSales.reduce((a, s) => a + (s.profit || 0), 0);
+  const totalOrders = monthSales.length;
+  const pendingDues = dues.filter(d => d.status !== "paid").reduce((a, d) => a + (d.amount - d.paid), 0);
+  const lowStock = products.filter(p => (p.stock || 0) <= 5 && (p.stock || 0) > 0).length;
+  const outStock = products.filter(p => (p.stock || 0) === 0).length;
+
+  document.getElementById("statRevenue").textContent = "AED " + totalRevenue.toFixed(0);
+  document.getElementById("statProfit").textContent = "AED " + totalProfit.toFixed(0);
+  document.getElementById("statOrders").textContent = totalOrders;
+  document.getElementById("statDue").textContent = pendingDues > 0 ? "AED " + pendingDues.toFixed(0) : "0";
+  document.getElementById("statDue").style.color = pendingDues > 0 ? "#E74C3C" : "#FFD700";
+  document.getElementById("statLowStock").textContent = lowStock + " low";
+  document.getElementById("statOutStock").textContent = outStock + " out";
+}
+
+function renderTabs() {
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    const active = b.dataset.tab === currentTab;
+    b.style.background = active ? "#FFD700" : "transparent";
+    b.style.color = active ? "#0A1628" : "#888";
+  });
+}
+
+function renderDateDropdowns() {
+  const ySel = document.getElementById("yearSelect");
+  const mSel = document.getElementById("monthSelect");
+  if (!ySel || !mSel) return;
+  if (ySel.options.length === 0) {
+    const now = new Date().getFullYear();
+    for (let y = now; y >= now - 3; y--) {
+      const o = document.createElement("option"); o.value = y; o.textContent = y; ySel.appendChild(o);
+    }
+  }
+  ySel.value = selectedYear;
+  if (mSel.options.length === 0) {
+    MONTHS.forEach((m, i) => {
+      const o = document.createElement("option"); o.value = i+1; o.textContent = m; mSel.appendChild(o);
+    });
+  }
+  mSel.value = selectedMonthNum;
+}
+
+function renderProducts() {
+  const area = document.getElementById("mainContent");
+  if (!area) return;
+  const q = (document.getElementById("searchInput")?.value || "").toLowerCase();
+  const filtered = products.filter(p => p.name.toLowerCase().includes(q) || (p.category||"").toLowerCase().includes(q));
+  
+  area.innerHTML = `
+    <div class="search-wrap">
+      <div class="search-wrap-inner">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="Search products..." oninput="renderProducts()" value="${q}"/>
+      </div>
+    </div>
+    <div style="padding:4px 12px 8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;">
+      <button onclick="filterCat('')" style="flex-shrink:0;background:${!window._filterCat?'#FFD700':'#0F1E35'};border:1px solid ${!window._filterCat?'#FFD700':'#1E3A5F'};border-radius:20px;padding:4px 12px;color:${!window._filterCat?'#0A1628':'#888'};font-size:11px;font-weight:700;cursor:pointer;">All</button>
+      ${CATEGORIES.map(c => `<button onclick="filterCat('${c}')" style="flex-shrink:0;background:${window._filterCat===c?'#FFD700':'#0F1E35'};border:1px solid ${window._filterCat===c?'#FFD700':'#1E3A5F'};border-radius:20px;padding:4px 12px;color:${window._filterCat===c?'#0A1628':'#888'};font-size:11px;font-weight:700;cursor:pointer;">${c}</button>`).join("")}
+    </div>
+    <div class="content-area" id="productList"></div>`;
+
+  const catFiltered = window._filterCat ? filtered.filter(p => p.category === window._filterCat) : filtered;
+  const listEl = document.getElementById("productList");
+  if (!listEl) return;
+
+  listEl.innerHTML = (catFiltered.length === 0
+    ? `<div style="text-align:center;padding:40px;color:#555;">No products found</div>`
+    : catFiltered.map(p => {
+        const stockClass = p.stock <= 0 ? "stock-zero" : p.stock <= 5 ? "stock-low" : "stock-ok";
+        const stockLabel = p.stock <= 0 ? "Out of Stock" : p.stock <= 5 ? `⚠️ ${p.stock} ${p.unit||'pcs'}` : `${p.stock} ${p.unit||'pcs'}`;
+        const profit = (p.sellPrice || 0) - (p.buyPrice || 0);
+        const icon = CAT_ICONS[p.category] || "📦";
+        return `<div class="product-card">
+          <div class="product-header">
+            <div class="product-icon" style="background:rgba(255,215,0,0.1);">${icon}</div>
+            <div class="product-info">
+              <div class="product-name">${p.name}</div>
+              <div class="product-cat">📂 ${p.category || "Other"}</div>
+              <div class="product-price">AED ${(p.sellPrice||0).toFixed(2)} ${p.buyPrice ? `· Profit: <span style="color:${profit>=0?'#27AE60':'#E74C3C'}">${profit>=0?'+':''}AED ${profit.toFixed(2)}</span>` : ''}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+              <span class="stock-badge ${stockClass}">${stockLabel}</span>
+            </div>
+          </div>
+          <div style="padding:0 14px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button onclick="adjustStock('${p.id}',-1)" style="background:#1A2F4A;border:none;border-radius:8px;width:30px;height:30px;color:#F0F0F0;font-size:16px;cursor:pointer;font-weight:700;">−</button>
+              <span style="font-size:14px;font-weight:700;min-width:30px;text-align:center;">${p.stock||0}</span>
+              <button onclick="adjustStock('${p.id}',1)" style="background:#1A2F4A;border:none;border-radius:8px;width:30px;height:30px;color:#F0F0F0;font-size:16px;cursor:pointer;font-weight:700;">+</button>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button onclick="openAddSaleForProduct('${p.id}')" style="background:linear-gradient(135deg,#27AE60,#1E8449);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">💸 Sell</button>
+              <button onclick="openEditProduct('${p.id}')" style="background:#1A2F4A;border:none;border-radius:8px;padding:6px 10px;color:#888;font-size:14px;cursor:pointer;">✏️</button>
+              <button onclick="deleteProduct('${p.id}')" style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:8px;padding:6px 10px;color:#E74C3C;font-size:14px;cursor:pointer;">🗑️</button>
+            </div>
+          </div>
+          ${p.notes ? `<div style="padding:0 14px 12px;font-size:11px;color:#666;">📝 ${p.notes}</div>` : ""}
+        </div>`;
+      }).join(""))
+    + `<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>`;
+}
+
+window.filterCat = function(cat) {
+  window._filterCat = cat;
+  renderProducts();
+};
+
+function openAddSaleForProduct(pid) {
+  if (!checkEditor()) return;
+  addSaleOpen = true;
+  setTimeout(() => {
+    document.getElementById("sDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("sProduct").value = pid;
+    document.getElementById("sQty").value = "1";
+    document.getElementById("sDiscount").value = "0";
+    document.getElementById("sPayment").value = "cash";
+    document.getElementById("sCustomer").value = "";
+    document.getElementById("sSaleNotes").value = "";
+    updateSaleCalc();
+  }, 50);
+  renderAll();
+}
+
+function renderSales() {
+  const area = document.getElementById("mainContent");
+  if (!area) return;
+  const monthSales = sales.filter(s => s.monthKey === getSelectedMonth()).sort((a,b) => b.date.localeCompare(a.date));
+  const totalRevenue = monthSales.reduce((a,s) => a + (s.total||0), 0);
+  const totalProfit = monthSales.reduce((a,s) => a + (s.profit||0), 0);
+
+  area.innerHTML = `
+    <div style="padding:8px 12px 4px;display:flex;gap:8px;">
+      <div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;">
+        <div style="font-size:10px;color:#888;">Revenue</div>
+        <div style="font-size:16px;font-weight:800;color:#27AE60;">AED ${totalRevenue.toFixed(0)}</div>
+      </div>
+      <div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;">
+        <div style="font-size:10px;color:#888;">Profit</div>
+        <div style="font-size:16px;font-weight:800;color:#3498DB;">AED ${totalProfit.toFixed(0)}</div>
+      </div>
+      <div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;">
+        <div style="font-size:10px;color:#888;">Orders</div>
+        <div style="font-size:16px;font-weight:800;color:#FFD700;">${monthSales.length}</div>
+      </div>
+    </div>
+    <div class="content-area">
+      ${monthSales.length === 0
+        ? `<div style="text-align:center;padding:40px;color:#555;">No sales this month</div>`
+        : monthSales.map(s => `
+          <div class="sale-card">
+            <div class="sale-date">${s.date ? s.date.slice(5).replace("-","/") : "—"}<br><span style="font-size:9px;color:#888;">${MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||""}</span></div>
+            <div class="sale-info">
+              <div class="sale-product">${s.productName}</div>
+              <div class="sale-detail">${s.qty} ${s.category||""} · ${s.payment} ${s.customer?'· '+s.customer:''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="sale-amount">AED ${(s.total||0).toFixed(2)}</div>
+              <div class="sale-profit">+${(s.profit||0).toFixed(2)} profit</div>
+              ${isEditor ? `<button onclick="deleteSale('${s.id}')" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:2px;">🗑️</button>` : ""}
+            </div>
+          </div>`).join("")}
+      <button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>
+    </div>`;
+}
+
+function renderDues() {
+  const area = document.getElementById("mainContent");
+  if (!area) return;
+  const pending = dues.filter(d => d.status !== "paid");
+  const paidDues = dues.filter(d => d.status === "paid");
+  const totalPending = pending.reduce((a,d) => a + (d.amount - d.paid), 0);
+
+  area.innerHTML = `
+    <div style="padding:8px 12px 4px;">
+      <div style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:#888;">Total Pending Dues</div>
+        <div style="font-size:22px;font-weight:800;color:#E74C3C;">AED ${totalPending.toFixed(2)}</div>
+      </div>
+    </div>
+    <div class="content-area">
+      ${pending.length === 0
+        ? `<div style="text-align:center;padding:30px;color:#555;">🎉 No pending dues!</div>`
+        : pending.map(d => `
+          <div style="background:#0F1E35;border:1px solid rgba(231,76,60,0.3);border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:28px;">👤</div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:700;">${d.customer}</div>
+              <div style="font-size:12px;color:#888;">${d.date} ${d.notes?'· '+d.notes:''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:16px;font-weight:800;color:#E74C3C;">AED ${(d.amount-d.paid).toFixed(2)}</div>
+              ${isEditor ? `<button onclick="markDuePaid('${d.id}')" style="background:rgba(39,174,96,0.2);border:1px solid #27AE60;border-radius:8px;padding:4px 10px;color:#27AE60;font-size:11px;cursor:pointer;margin-top:4px;">✅ Paid</button>` : ""}
+              ${isEditor ? `<button onclick="deleteDue('${d.id}')" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-left:4px;">🗑️</button>` : ""}
+            </div>
+          </div>`).join("")}
+      ${paidDues.length > 0 ? `
+        <div style="font-size:11px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 0 6px;">Paid Dues</div>
+        ${paidDues.slice(-10).map(d => `
+          <div style="background:#080F1E;border:1px solid #1E3A5F;border-radius:12px;margin-bottom:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;opacity:0.6;">
+            <div style="flex:1;font-size:13px;">${d.customer}</div>
+            <span style="font-size:12px;color:#27AE60;font-weight:700;">✅ AED ${d.amount.toFixed(2)}</span>
+          </div>`).join("")}
+      ` : ""}
+    </div>`;
+}
+
+function renderReport() {
+  const area = document.getElementById("mainContent");
+  if (!area) return;
+  const monthSales = sales.filter(s => s.monthKey === getSelectedMonth());
+  const totalRevenue = monthSales.reduce((a,s) => a + (s.total||0), 0);
+  const totalProfit = monthSales.reduce((a,s) => a + (s.profit||0), 0);
+  const totalOrders = monthSales.length;
+  const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  // Category breakdown
+  const catMap = {};
+  monthSales.forEach(s => {
+    const c = s.category || "Other";
+    catMap[c] = (catMap[c] || 0) + (s.total || 0);
+  });
+  const topCats = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  // Product breakdown
+  const prodMap = {};
+  monthSales.forEach(s => {
+    prodMap[s.productName] = (prodMap[s.productName] || 0) + (s.qty || 0);
+  });
+  const topProds = Object.entries(prodMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  // Payment breakdown
+  const payMap = { cash: 0, card: 0, due: 0, online: 0 };
+  monthSales.forEach(s => { payMap[s.payment] = (payMap[s.payment] || 0) + (s.total || 0); });
+
+  area.innerHTML = `
+    <div class="content-area">
+      <div class="rep-grid">
+        <div class="rep-box"><div class="rep-val" style="color:#27AE60;">AED ${totalRevenue.toFixed(0)}</div><div class="rep-lbl">Revenue</div></div>
+        <div class="rep-box"><div class="rep-val" style="color:#3498DB;">AED ${totalProfit.toFixed(0)}</div><div class="rep-lbl">Profit</div></div>
+        <div class="rep-box"><div class="rep-val">${totalOrders}</div><div class="rep-lbl">Orders</div></div>
+        <div class="rep-box"><div class="rep-val" style="font-size:14px;">AED ${avgOrder.toFixed(0)}</div><div class="rep-lbl">Avg/Order</div></div>
+      </div>
+
+      ${topCats.length > 0 ? `
+        <div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📊 Sales by Category</div>
+          ${topCats.map(([cat, rev]) => {
+            const pct = totalRevenue > 0 ? (rev/totalRevenue*100).toFixed(0) : 0;
+            return `<div style="margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+                <span style="color:#ccc;">${cat}</span>
+                <span style="color:#FFD700;font-weight:700;">AED ${rev.toFixed(0)} (${pct}%)</span>
+              </div>
+              <div style="background:#0A1628;border-radius:4px;height:6px;overflow:hidden;">
+                <div style="background:linear-gradient(90deg,#FFD700,#FFA500);height:100%;width:${pct}%;border-radius:4px;"></div>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>` : ""}
+
+      ${topProds.length > 0 ? `
+        <div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">🏆 Top Products</div>
+          ${topProds.map(([name, qty], i) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #0A1628;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:14px;color:#FFD700;font-weight:800;">${i+1}</span>
+                <span style="font-size:13px;">${name}</span>
+              </div>
+              <span style="font-size:12px;color:#888;">${qty} sold</span>
+            </div>`).join("")}
+        </div>` : ""}
+
+      <div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">💳 Payment Methods</div>
+        ${Object.entries(payMap).filter(([,v]) => v > 0).map(([method, amt]) => `
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #0A1628;">
+            <span style="color:#888;text-transform:capitalize;">💰 ${method}</span>
+            <span style="font-weight:700;">AED ${amt.toFixed(2)}</span>
+          </div>`).join("")}
+      </div>
+
+      <div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 Stock Overview</div>
+        ${products.length === 0
+          ? `<div style="color:#555;text-align:center;font-size:13px;">No products yet</div>`
+          : products.sort((a,b) => (a.stock||0)-(b.stock||0)).map(p => {
+              const stockClass = p.stock <= 0 ? "#E74C3C" : p.stock <= 5 ? "#E67E22" : "#27AE60";
+              return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px solid #0A1628;">
+                <span style="color:#ccc;">${p.name}</span>
+                <span style="color:${stockClass};font-weight:700;">${p.stock||0} ${p.unit||'pcs'}</span>
+              </div>`;
+            }).join("")}
+      </div>
+    </div>`;
+}
+
+window.openAddProduct = openAddProduct;
+window.openEditProduct = openEditProduct;
+window.openAddSale = openAddSale;
+window.openAddSaleForProduct = openAddSaleForProduct;
+window.doAddProduct = doAddProduct;
+window.doEditProduct = doEditProduct;
+window.deleteProduct = deleteProduct;
+window.doAddSale = doAddSale;
+window.deleteSale = deleteSale;
+window.closeProductModal = closeProductModal;
+window.closeSaleModal = closeSaleModal;
+window.markDuePaid = markDuePaid;
+window.deleteDue = deleteDue;
+window.updateProductCalc = updateProductCalc;
+window.updateEditProductCalc = updateEditProductCalc;
+window.updateSaleCalc = updateSaleCalc;
+window.adjustStock = adjustStock;
+window.setTab = setTab;
+window.tryLogin = tryLogin;
+window.viewOnly = viewOnly;
+window.logout = logout;
+window.openChangePass = openChangePass;
+window.closeChangePass = closeChangePass;
+window.doChangePass = doChangePass;
+window.backupData = backupData;
+window.restoreData = restoreData;
+window.handleRestore = handleRestore;
+window.exportCSV = exportCSV;
+</script>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <h1>💡 Payel Shop</h1>
+    <div style="display:flex;gap:6px;">
+      <button class="lock-btn" onclick="logout()">🔒</button>
+    </div>
+  </div>
+  <div style="font-size:11px;color:#888;margin-bottom:8px;">Lights & Accessories</div>
+  <div class="header-btns">
+    <button class="hbtn" onclick="exportCSV()" style="color:#27AE60;border-color:#27AE60;">📥 CSV</button>
+    <button class="hbtn" onclick="backupData()" style="color:#3498DB;border-color:#3498DB;">💾 Backup</button>
+    <button class="hbtn" onclick="restoreData()" style="color:#888;">📂 Restore</button>
+    <button class="hbtn" onclick="openChangePass()" style="color:#FFD700;border-color:#FFD700;">🔐 Password</button>
+  </div>
+</div>
+<input type="file" id="restoreInput" accept=".json" style="display:none" onchange="handleRestore(this)">
+
+<!-- Date Filter -->
+<div class="date-dropdowns">
+  <select class="date-select" id="yearSelect" onchange="selectedYear=parseInt(this.value);renderAll()"></select>
+  <select class="date-select" id="monthSelect" onchange="selectedMonthNum=parseInt(this.value);renderAll()"></select>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-box">
+    <div class="stat-val" id="statRevenue" style="color:#27AE60;font-size:13px;">AED 0</div>
+    <div class="stat-lbl">Revenue</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="statProfit" style="color:#3498DB;font-size:13px;">AED 0</div>
+    <div class="stat-lbl">Profit</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="statOrders">0</div>
+    <div class="stat-lbl">Orders</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="statDue">0</div>
+    <div class="stat-lbl">Due</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="statLowStock" style="color:#E67E22;font-size:13px;">0</div>
+    <div class="stat-lbl">Low Stock</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="statOutStock" style="color:#E74C3C;font-size:13px;">0</div>
+    <div class="stat-lbl">Out Stock</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab-bar">
+    <button class="tab-btn" data-tab="products" onclick="setTab('products')" style="background:#FFD700;color:#0A1628;">📦 Products</button>
+    <button class="tab-btn" data-tab="sales" onclick="setTab('sales')">💸 Sales</button>
+    <button class="tab-btn" data-tab="dues" onclick="setTab('dues')">⚠️ Dues</button>
+    <button class="tab-btn" data-tab="report" onclick="setTab('report')">📊 Report</button>
+  </div>
+</div>
+
+<!-- Main Content Area -->
+<div id="mainContent"></div>
+
+<!-- =================== MODALS =================== -->
+
+<!-- Add Product Modal -->
+<div class="modal-bg" id="addProductModal" style="display:none;">
+  <div class="modal">
+    <h3>📦 Add Product</h3>
+    <label>Product Name *</label>
+    <input type="text" id="pName" placeholder="e.g. LED Strip 5M RGB"/>
+    <label>Category</label>
+    <select id="pCategory">
+      ${CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join("")}
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label>Buy Price (AED)</label>
+        <input type="number" id="pBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updateProductCalc()"/>
+      </div>
+      <div>
+        <label>Sell Price (AED) *</label>
+        <input type="number" id="pSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateProductCalc()"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+      <div>
+        <label>Stock Quantity</label>
+        <input type="number" id="pStock" placeholder="0" min="0"/>
+      </div>
+      <div>
+        <label>Unit</label>
+        <select id="pUnit">
+          <option value="pcs">pcs</option>
+          <option value="m">meter</option>
+          <option value="set">set</option>
+          <option value="roll">roll</option>
+          <option value="box">box</option>
+          <option value="pair">pair</option>
+        </select>
+      </div>
+    </div>
+    <label>Barcode / SKU</label>
+    <input type="text" id="pBarcode" placeholder="Optional"/>
+    <label>Notes</label>
+    <textarea id="pNotes" placeholder="Optional notes..."></textarea>
+    <div class="calc-box" id="productCalcBox">
+      <div style="color:#555;font-size:12px;text-align:center;">Enter prices to see margin</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeProductModal()">Cancel</button>
+      <button class="btn-primary" onclick="doAddProduct()">✅ Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-bg" id="editProductModal" style="display:none;">
+  <div class="modal">
+    <h3>✏️ Edit Product</h3>
+    <label>Product Name *</label>
+    <input type="text" id="epName"/>
+    <label>Category</label>
+    <select id="epCategory">
+      ${CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join("")}
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label>Buy Price (AED)</label>
+        <input type="number" id="epBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/>
+      </div>
+      <div>
+        <label>Sell Price (AED) *</label>
+        <input type="number" id="epSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+      <div>
+        <label>Stock Quantity</label>
+        <input type="number" id="epStock" min="0"/>
+      </div>
+      <div>
+        <label>Unit</label>
+        <select id="epUnit">
+          <option value="pcs">pcs</option>
+          <option value="m">meter</option>
+          <option value="set">set</option>
+          <option value="roll">roll</option>
+          <option value="box">box</option>
+          <option value="pair">pair</option>
+        </select>
+      </div>
+    </div>
+    <label>Barcode / SKU</label>
+    <input type="text" id="epBarcode"/>
+    <label>Notes</label>
+    <textarea id="epNotes"></textarea>
+    <div class="calc-box" id="editProductCalcBox"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeProductModal()">Cancel</button>
+      <button class="btn-primary" onclick="doEditProduct()">✅ Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Sale Modal -->
+<div class="modal-bg" id="addSaleModal" style="display:none;">
+  <div class="modal">
+    <h3>💸 New Sale</h3>
+    <label>Date</label>
+    <input type="date" id="sDate"/>
+    <label>Product *</label>
+    <select id="sProduct" onchange="updateSaleCalc()">
+      <option value="">-- Select Product --</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label>Quantity *</label>
+        <input type="number" id="sQty" placeholder="1" min="1" oninput="updateSaleCalc()"/>
+      </div>
+      <div>
+        <label>Discount (AED)</label>
+        <input type="number" id="sDiscount" placeholder="0" min="0" step="0.01" oninput="updateSaleCalc()"/>
+      </div>
+    </div>
+    <label>Payment Method</label>
+    <select id="sPayment">
+      <option value="cash">💵 Cash</option>
+      <option value="card">💳 Card</option>
+      <option value="online">📱 Online Transfer</option>
+      <option value="due">⚠️ Due / Credit</option>
+    </select>
+    <label>Customer Name (optional)</label>
+    <input type="text" id="sCustomer" placeholder="e.g. Ahmed Ali"/>
+    <label>Notes</label>
+    <textarea id="sSaleNotes" placeholder="Optional..."></textarea>
+    <div class="calc-box" id="saleCalcBox">
+      <div style="color:#555;font-size:12px;text-align:center;">Select a product to see details</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeSaleModal()">Cancel</button>
+      <button class="btn-primary" onclick="doAddSale()">✅ Save Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-bg" id="cpModal" style="display:none;align-items:center;">
+  <div class="modal" style="border-radius:20px;margin:20px;">
+    <h3>🔐 Change Password</h3>
+    <label>Current Password</label>
+    <input type="password" id="cpOld" placeholder="Current password"/>
+    <label>New Password</label>
+    <input type="password" id="cpNew" placeholder="Min 4 characters"/>
+    <label>Confirm Password</label>
+    <input type="password" id="cpConfirm" placeholder="Confirm new password"/>
+    <div id="cpError" style="color:#E74C3C;font-size:12px;margin-top:6px;display:none;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeChangePass()">Cancel</button>
+      <button class="btn-primary" onclick="doChangePass()">✅ Change</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Modal management via renderAll ──
+const origRenderAll = window.renderAll || renderAll;
+function manageModals() {
+  // Add Product
+  const addPModal = document.getElementById("addProductModal");
+  if (addPModal) addPModal.style.display = addProductOpen ? "flex" : "none";
+
+  // Edit Product
+  const editPModal = document.getElementById("editProductModal");
+  if (editPModal) editPModal.style.display = editProduct ? "flex" : "none";
+
+  // Add Sale — populate products dropdown
+  const addSModal = document.getElementById("addSaleModal");
+  if (addSModal) {
+    addSModal.style.display = addSaleOpen ? "flex" : "none";
+    if (addSaleOpen) {
+      const sel = document.getElementById("sProduct");
+      const currentVal = sel.value;
+      sel.innerHTML = `<option value="">-- Select Product --</option>` +
+        products.filter(p => (p.stock||0) > 0).map(p => `<option value="${p.id}">${p.name} (${p.stock} ${p.unit||'pcs'}) — AED ${p.sellPrice}</option>`).join("") +
+        `<optgroup label="Out of Stock">` +
+        products.filter(p => (p.stock||0) <= 0).map(p => `<option value="${p.id}" style="color:#888;">${p.name} — Out of Stock</option>`).join("") +
+        `</optgroup>`;
+      if (currentVal) sel.value = currentVal;
+    }
+  }
+}
+
+// Patch renderAll to also manage modals
+const _origRenderAll = renderAll;
+window.renderAll = function() {
+  _origRenderAll();
+  manageModals();
+};
+
+// Kick off initial render
+if (isEditor || isViewer) renderAll();
+</script>
+</body>
+</html>
