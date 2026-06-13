@@ -266,10 +266,17 @@ function shareWA(){window.open("https://api.whatsapp.com/send?text="+encodeURICo
 
 function setTab(t){currentTab=t;_srchQ="";_filterCat="";document.querySelectorAll(".tab-btn").forEach(b=>{const a=b.dataset.tab===t;b.classList.toggle("active",a);});renderAll();}
 
-function renderDateBadge(){const b=document.getElementById("dateBadge");if(b)b.textContent="🗓️ "+MF[selectedMonthNum-1]+" "+selectedYear;}
+function renderDateBadge(){
+  const b=document.getElementById("dateBadge");if(!b)return;
+  const today=new Date();
+  const dd=String(today.getDate()).padStart(2,"0");
+  const mm=String(today.getMonth()+1).padStart(2,"0");
+  const yy=today.getFullYear();
+  b.textContent="🗓️ "+dd+" "+MF[today.getMonth()]+" "+yy;
+}
 function renderDateDrops(){
   const ySel=document.getElementById("yearSelect"),mSel=document.getElementById("monthSelect");if(!ySel||!mSel)return;
-  if(!ySel.options.length){const n=new Date().getFullYear();for(let y=n+1;y>=n-4;y--){const o=document.createElement("option");o.value=y;o.textContent=y;ySel.appendChild(o);}}
+  if(!ySel.options.length){const n=new Date().getFullYear();for(let y=n+2;y>=2020;y--){const o=document.createElement("option");o.value=y;o.textContent=y;ySel.appendChild(o);}}
   ySel.value=selectedYear;
   if(!mSel.options.length)MF.forEach((m,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=m;mSel.appendChild(o);});
   mSel.value=selectedMonthNum;
@@ -530,24 +537,50 @@ function initCropCanvas(src){
   img.onload = function(){
     _cropImg = img;
     const canvas = document.getElementById("cropCanvas");
-    const maxW = Math.min(window.innerWidth - 40, 440);
+    const maxW = Math.min(window.innerWidth - 20, 460);
     const scale = maxW / img.width;
     canvas.width = maxW;
-    canvas.height = img.height * scale;
+    canvas.height = Math.min(img.height * scale, window.innerHeight * 0.6);
     _cropCtx = canvas.getContext("2d");
-    // Init crop rect as center square
-    const side = Math.min(canvas.width, canvas.height) * 0.8;
-    _cropRect = {x:(canvas.width-side)/2, y:(canvas.height-side)/2, w:side, h:side};
+    // Init crop rect = full canvas (full image by default)
+    _cropRect = {x:2, y:2, w:canvas.width-4, h:canvas.height-4};
     drawCrop();
-    // Touch/mouse events
-    canvas.ontouchstart = e=>{ e.preventDefault(); const t=e.touches[0]; const r=canvas.getBoundingClientRect(); _cropDrag=true; _cropStart={x:t.clientX-r.left-_cropRect.x, y:t.clientY-r.top-_cropRect.y}; };
-    canvas.ontouchmove = e=>{ e.preventDefault(); if(!_cropDrag)return; const t=e.touches[0]; const r=canvas.getBoundingClientRect(); _cropRect.x=t.clientX-r.left-_cropStart.x; _cropRect.y=t.clientY-r.top-_cropStart.y; _cropRect.x=Math.max(0,Math.min(_cropRect.x,canvas.width-_cropRect.w)); _cropRect.y=Math.max(0,Math.min(_cropRect.y,canvas.height-_cropRect.h)); drawCrop(); };
+    function getTouchPos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches[0]; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+    function getMousePos(e){ const r=canvas.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+    function startDrag(pos){ _cropDrag=true; _cropStart={x:pos.x-_cropRect.x, y:pos.y-_cropRect.y}; }
+    function moveDrag(pos){ if(!_cropDrag)return; _cropRect.x=Math.max(0,Math.min(pos.x-_cropStart.x,canvas.width-_cropRect.w)); _cropRect.y=Math.max(0,Math.min(pos.y-_cropStart.y,canvas.height-_cropRect.h)); drawCrop(); }
+    canvas.ontouchstart = e=>{ e.preventDefault(); startDrag(getTouchPos(e)); };
+    canvas.ontouchmove = e=>{ e.preventDefault(); moveDrag(getTouchPos(e)); };
     canvas.ontouchend = ()=>{ _cropDrag=false; };
-    canvas.onmousedown = e=>{ const r=canvas.getBoundingClientRect(); _cropDrag=true; _cropStart={x:e.clientX-r.left-_cropRect.x,y:e.clientY-r.top-_cropRect.y}; };
-    canvas.onmousemove = e=>{ if(!_cropDrag)return; const r=canvas.getBoundingClientRect(); _cropRect.x=e.clientX-r.left-_cropStart.x; _cropRect.y=e.clientY-r.top-_cropStart.y; _cropRect.x=Math.max(0,Math.min(_cropRect.x,canvas.width-_cropRect.w)); _cropRect.y=Math.max(0,Math.min(_cropRect.y,canvas.height-_cropRect.h)); drawCrop(); };
+    canvas.onmousedown = e=>startDrag(getMousePos(e));
+    canvas.onmousemove = e=>moveDrag(getMousePos(e));
     canvas.onmouseup = ()=>{ _cropDrag=false; };
   };
   img.src = src;
+}
+function useFullImage(){
+  // Save without cropping
+  if(!_cropImg){showErr("No image!");return;}
+  const canvas=document.createElement("canvas");
+  const maxSize=600; 
+  const scale=Math.min(maxSize/_cropImg.width, maxSize/_cropImg.height);
+  canvas.width=_cropImg.width*scale; canvas.height=_cropImg.height*scale;
+  canvas.getContext("2d").drawImage(_cropImg,0,0,canvas.width,canvas.height);
+  const compressed=canvas.toDataURL("image/jpeg",0.75);
+  closeCropModal();
+  applyImage(compressed);
+}
+function applyImage(compressed){
+  if(_imgMode==="prod"&&_imgProdId){
+    db.ref("shop_products/"+_imgProdId+"/image").set(compressed);
+    showNotif("✅ Image saved!");
+  }else if(_imgMode==="add"){
+    const pw=document.getElementById("pImgPreviewWrap"),pi=document.getElementById("pImgPreview");
+    if(pw&&pi){pw.style.display="block";pi.src=compressed;window._addProdImg=compressed;}
+  }else if(_imgMode==="edit"){
+    const pw=document.getElementById("epImgPreviewWrap"),pi=document.getElementById("epImgPreview");
+    if(pw&&pi){pw.style.display="block";pi.src=compressed;window._editProdImg=compressed;}
+  }
 }
 
 function drawCrop(){
@@ -595,22 +628,7 @@ function saveCroppedImage(){
     0, 0, size, size);
   const compressed=out.toDataURL("image/jpeg",0.75);
   closeCropModal();
-
-  if(_imgMode==="prod" && _imgProdId){
-    // Save directly to firebase product
-    db.ref("shop_products/"+_imgProdId+"/image").set(compressed);
-    showNotif("✅ Image saved!");
-  } else if(_imgMode==="add"){
-    // Preview in add modal
-    const pw=document.getElementById("pImgPreviewWrap");
-    const pi=document.getElementById("pImgPreview");
-    if(pw&&pi){ pw.style.display="block"; pi.src=compressed; window._addProdImg=compressed; }
-  } else if(_imgMode==="edit"){
-    // Preview in edit modal
-    const pw=document.getElementById("epImgPreviewWrap");
-    const pi=document.getElementById("epImgPreview");
-    if(pw&&pi){ pw.style.display="block"; pi.src=compressed; window._editProdImg=compressed; }
-  }
+  applyImage(compressed);
 }
 
 function clearAddProdImg(){ window._addProdImg=null; const pw=document.getElementById("pImgPreviewWrap"); if(pw)pw.style.display="none"; }
@@ -753,7 +771,39 @@ function renderAll(){
   manageModals();
 }
 
-function renderStats(){const ms=sales.filter(s=>s.monthKey===getMonth()),rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0),pendDues=dues.filter(d=>d.status!=="paid").reduce((a,d)=>a+(d.amount-d.paid),0),low=products.filter(p=>(p.stock||0)<=(p.minStock||5)&&(p.stock||0)>0).length,out=products.filter(p=>(p.stock||0)===0).length;document.getElementById("statRevenue").textContent="AED "+rev.toFixed(0);document.getElementById("statProfit").textContent="AED "+profit.toFixed(0);document.getElementById("statOrders").textContent=ms.length;document.getElementById("statDue").textContent=pendDues>0?"AED "+pendDues.toFixed(0):"0";document.getElementById("statDue").style.color=pendDues>0?"var(--red)":"var(--gold)";document.getElementById("statLowStock").textContent=low+" low";document.getElementById("statOutStock").textContent=out+" out";}
+function renderStats(){
+  const ms=sales.filter(s=>s.monthKey===getMonth()),rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0),pendDues=dues.filter(d=>d.status!=="paid").reduce((a,d)=>a+(d.amount-d.paid),0);
+  const lowProds=products.filter(p=>(p.stock||0)<=(p.minStock||5)&&(p.stock||0)>0);
+  const outProds=products.filter(p=>(p.stock||0)===0);
+  document.getElementById("statRevenue").textContent="AED "+rev.toFixed(0);
+  document.getElementById("statProfit").textContent="AED "+profit.toFixed(0);
+  document.getElementById("statOrders").textContent=ms.length;
+  document.getElementById("statDue").textContent=pendDues>0?"AED "+pendDues.toFixed(0):"0";
+  document.getElementById("statDue").style.color=pendDues>0?"var(--red)":"var(--gold)";
+  document.getElementById("statLowStock").textContent=lowProds.length+" low";
+  document.getElementById("statOutStock").textContent=outProds.length+" out";
+}
+function showStockAlert(type){
+  const prods = type==="low"
+    ? products.filter(p=>(p.stock||0)<=(p.minStock||5)&&(p.stock||0)>0)
+    : products.filter(p=>(p.stock||0)===0);
+  if(!prods.length){showNotif("No products in this category!");return;}
+  const title = type==="low"?"⚠️ Low Stock Products":"🔴 Out of Stock";
+  let html='<div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:flex-end;justify-content:center;" onclick="this.remove()">';
+  html+='<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:70vh;overflow-y:auto;border-top:2px solid var(--border);" onclick="event.stopPropagation()">';
+  html+='<div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:14px;">'+title+'</div>';
+  prods.forEach(p=>{
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg);">';
+    html+='<div style="font-size:20px;">'+(CI[p.category]||"📦")+'</div>';
+    html+='<div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+p.name+'</div>';
+    html+='<div style="font-size:11px;color:var(--sub);">'+p.category+'</div></div>';
+    html+='<div style="text-align:right;"><div style="font-size:14px;font-weight:800;color:'+(p.stock<=0?"var(--red)":"var(--gold2)")+';">'+p.stock+' '+(p.unit||"pcs")+'</div>';
+    html+='<div style="font-size:10px;color:var(--sub);">Min: '+(p.minStock||5)+'</div></div></div>';
+  });
+  html+='<button onclick="this.closest('[onclick]').remove()" style="width:100%;margin-top:14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">✕ Close</button>';
+  html+='</div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
 
 function renderProducts(){
   const area=document.getElementById("mainContent");if(!area)return;
@@ -768,7 +818,31 @@ function renderProducts(){
   if(_srchQ){const si=document.getElementById("prodSearch");if(si){si.focus();const l=_srchQ.length;si.setSelectionRange(l,l);}}
 }
 
-function renderSales(){const area=document.getElementById("mainContent");if(!area)return;const ms=sales.filter(s=>s.monthKey===getMonth()).sort((a,b)=>b.date.localeCompare(a.date)),rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);const cards=ms.map(s=>`<div class="sale-card"><div class="sale-date-box">${s.date?s.date.slice(5).replace("-","/"):"—"}<br><span style="font-size:9px;color:var(--sub);">${MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||""}</span></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">${s.productName}</div><div style="font-size:11px;color:var(--sub);margin-top:1px;">${s.qty}${s.customer?" · "+s.customer:""}${s.phone?" · 📞"+s.phone:""} · ${s.payment}</div>${s.notes?`<div style="font-size:10px;color:var(--sub);">${s.notes}</div>`:""}</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${(s.total||0).toFixed(2)}</div><div style="font-size:10px;color:var(--blue);">+${(s.profit||0).toFixed(2)}</div>${s.payment==="due"?'<div style="font-size:10px;color:var(--gold2);font-weight:700;">⚠️ Due</div>':""}<div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">${s.payment==="due"?`<button onclick="sendCreditWA('${s.id}')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>`:""}${isEditor?`<button onclick="openEditSale('${s.id}')" style="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;">✏️</button>`:""}${isEditor?`<button onclick="deleteSale('${s.id}')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>`:""}</div></div></div>`).join("");area.innerHTML=`<div style="padding:6px 12px 4px;display:flex;gap:6px;"><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${rev.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:800;color:var(--blue);">AED ${profit.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:14px;font-weight:800;color:var(--gold);">${ms.length}</div></div></div><div class="content-area">${ms.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No sales this month</div>`:cards}${isEditor?'<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>':""}</div>`;}
+let _saleDateFilter="all", _saleCustomDate="";
+function setSaleDateFilter(f,customDate){
+  _saleDateFilter=f;
+  if(customDate)_saleCustomDate=customDate;
+  renderSales();
+}
+function renderSales(){const area=document.getElementById("mainContent");if(!area)return;
+  // Get month sales then apply date filter
+  let ms=sales.filter(s=>s.monthKey===getMonth());
+  const today=new Date().toISOString().split("T")[0];
+  const filterVal=document.getElementById("saleDateFilterSel")?.value||"all";
+  if(filterVal==="today")ms=ms.filter(s=>s.date===today);
+  else if(filterVal==="week"){const w=new Date();w.setDate(w.getDate()-7);const ws=w.toISOString().split("T")[0];ms=ms.filter(s=>s.date>=ws);}
+  else if(filterVal==="custom"){const cv=document.getElementById("saleDateCustom")?.value;if(cv)ms=ms.filter(s=>s.date===cv);}
+  ms=ms.sort((a,b)=>b.date.localeCompare(a.date));
+  const rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);const cards=ms.map(s=>`<div class="sale-card"><div class="sale-date-box">${s.date?s.date.slice(5).replace("-","/"):"—"}<br><span style="font-size:9px;color:var(--sub);">${MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||""}</span></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">${s.productName}</div><div style="font-size:11px;color:var(--sub);margin-top:1px;">${s.qty}${s.customer?" · "+s.customer:""}${s.phone?" · 📞"+s.phone:""} · ${s.payment}</div>${s.notes?`<div style="font-size:10px;color:var(--sub);">${s.notes}</div>`:""}</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${(s.total||0).toFixed(2)}</div><div style="font-size:10px;color:var(--blue);">+${(s.profit||0).toFixed(2)}</div>${s.payment==="due"?'<div style="font-size:10px;color:var(--gold2);font-weight:700;">⚠️ Due</div>':""}<div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">${s.payment==="due"?`<button onclick="sendCreditWA('${s.id}')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>`:""}${isEditor?`<button onclick="openEditSale('${s.id}')" style="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;">✏️</button>`:""}${isEditor?`<button onclick="deleteSale('${s.id}')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>`:""}</div></div></div>`).join("");area.innerHTML=`<div style="padding:6px 12px 4px;display:flex;gap:6px;align-items:center;">
+    <select id="saleDateFilterSel" onchange="renderSales()" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 8px;color:var(--text);font-size:12px;outline:none;-webkit-appearance:none;">
+      <option value="all">📅 All (This Month)</option>
+      <option value="today">📌 Today</option>
+      <option value="week">📆 Last 7 Days</option>
+      <option value="custom">🗓️ Custom Date</option>
+    </select>
+    <input type="date" id="saleDateCustom" onchange="renderSales()" style="display:none;flex:1;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;" />
+  </div>
+  <div style="padding:0 12px 4px;display:flex;gap:6px;"><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${rev.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:800;color:var(--blue);">AED ${profit.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:14px;font-weight:800;color:var(--gold);">${ms.length}</div></div></div><div class="content-area">${ms.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No sales this month</div>`:cards}${isEditor?'<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>':""}</div>`;}
 
 function renderPurchases(){const area=document.getElementById("mainContent");if(!area)return;const now=new Date();let filtered=purchases;if(purchaseFilter==="month")filtered=purchases.filter(p=>p.monthKey===getMonth());else if(purchaseFilter==="last"){const lm=now.getMonth()===0?11:now.getMonth()-1,ly=now.getMonth()===0?now.getFullYear()-1:now.getFullYear();filtered=purchases.filter(p=>p.monthKey===ly+"-"+String(lm+1).padStart(2,"0"));}filtered=filtered.sort((a,b)=>b.date.localeCompare(a.date));const ts=filtered.reduce((a,p)=>a+(p.total||0),0);const grouped={};filtered.forEach(p=>{if(!grouped[p.date])grouped[p.date]=[];grouped[p.date].push(p);});let gHtml=Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date=>{const items=grouped[date],dt=items.reduce((s,p)=>s+(p.total||0),0),d=new Date(date+"T00:00:00"),ds=d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),isOpen=!!purchaseExpanded[date];let inner=isOpen?`<div style="border-top:1px solid var(--bg);">${items.map(p=>`<div class="pur-item"><div style="flex:1;"><div style="font-size:13px;font-weight:600;">📦 ${p.productName}</div><div style="font-size:11px;color:var(--sub);">${p.supplier?"👤 "+p.supplier+(p.supPhone?" "+p.supPhone:"")+"<br>":""}${p.qty} pcs${p.notes?"<br>"+p.notes:""}</div></div><div style="text-align:right;"><div style="color:var(--green);font-weight:700;font-size:13px;">AED ${(p.total||0).toFixed(2)}</div><div style="display:flex;gap:4px;margin-top:2px;justify-content:flex-end;">${isEditor?`<button onclick="event.stopPropagation();openEditPurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">✏️</button>`:""}${isEditor?`<button onclick="event.stopPropagation();deletePurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">🗑️</button>`:""}</div></div></div>`).join("")}${isEditor?`<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--bg2);"><button onclick="event.stopPropagation();openAddPurchase()" style="background:rgba(255,215,0,0.1);border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:11px;padding:4px 12px;cursor:pointer;">+ Add Item</button></div>`:""}</div>`:"";return `<div class="pur-group"><div class="pur-header" onclick="togglePurDate('${date}')"><div><span style="font-size:13px;font-weight:700;color:var(--gold);">${ds}</span><span style="font-size:11px;color:var(--sub);margin-left:8px;">${items.length} item${items.length>1?"s":""}</span></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;color:var(--green);">AED ${dt.toFixed(2)}</span><span style="color:var(--sub);font-size:14px;display:inline-block;transform:rotate(${isOpen?"90":"0"}deg);">▶</span></div></div>${inner}</div>`;}).join("");area.innerHTML=`<div style="padding:4px 12px;display:flex;gap:6px;">${["all","month","last"].map((f,i)=>{const labels=["All","This Month","Last Month"],act=purchaseFilter===f;return `<button onclick="setPurFilter('${f}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid ${act?"var(--gold)":"var(--border)"};background:${act?"linear-gradient(135deg,var(--gold),var(--gold2))":"transparent"};color:${act?"#1A0533":"var(--sub)"};font-size:12px;font-weight:700;cursor:pointer;">${labels[i]}</button>`;}).join("")}</div><div style="background:var(--card);margin:4px 12px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-around;"><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Total Spent</div><div style="font-size:15px;font-weight:800;color:var(--red);">AED ${ts.toFixed(0)}</div></div><div style="width:1px;background:var(--border);"></div><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Records</div><div style="font-size:15px;font-weight:800;color:var(--gold);">${filtered.length}</div></div></div><div class="content-area">${filtered.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No purchase records</div>`:gHtml}${isEditor?'<button class="add-btn" onclick="openAddPurchase()">+ Add Purchase</button>':""}</div>`;}
 
@@ -836,8 +910,8 @@ function manageModals(){document.getElementById("addProductModal").style.display
   <div class="stat-box"><div class="stat-val" id="statProfit" style="color:var(--blue);font-size:11px;">AED 0</div><div class="stat-lbl">Profit</div></div>
   <div class="stat-box"><div class="stat-val" id="statOrders">0</div><div class="stat-lbl">Orders</div></div>
   <div class="stat-box"><div class="stat-val" id="statDue">0</div><div class="stat-lbl">Due</div></div>
-  <div class="stat-box"><div class="stat-val" id="statLowStock" style="color:var(--gold2);font-size:11px;">0</div><div class="stat-lbl">Low Stock</div></div>
-  <div class="stat-box"><div class="stat-val" id="statOutStock" style="color:var(--red);font-size:11px;">0</div><div class="stat-lbl">Out Stock</div></div>
+  <div class="stat-box" onclick="showStockAlert('low')" style="cursor:pointer;"><div class="stat-val" id="statLowStock" style="color:var(--gold2);font-size:11px;">0</div><div class="stat-lbl">Low Stock</div></div>
+  <div class="stat-box" onclick="showStockAlert('out')" style="cursor:pointer;"><div class="stat-val" id="statOutStock" style="color:var(--red);font-size:11px;">0</div><div class="stat-lbl">Out Stock</div></div>
 </div>
 
 <!-- TABS -->
@@ -974,13 +1048,14 @@ function manageModals(){document.getElementById("addProductModal").style.display
 <div id="cropModal" style="display:none;position:fixed;inset:0;background:#000;z-index:600;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px;overflow-y:auto;">
   <div style="color:var(--gold);font-size:14px;font-weight:700;padding:10px;text-align:center;">✂️ Drag to position · Resize with buttons</div>
   <canvas id="cropCanvas" style="border:2px solid var(--gold);border-radius:10px;touch-action:none;max-width:calc(100vw - 20px);"></canvas>
-  <div style="display:flex;gap:8px;margin-top:12px;width:100%;max-width:460px;">
-    <button onclick="cropSizeChange(-30)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:18px;cursor:pointer;">🔍−</button>
-    <button onclick="cropSizeChange(30)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:18px;cursor:pointer;">🔍+</button>
-    <button onclick="saveCroppedImage()" style="flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px;color:#1A0533;font-size:14px;font-weight:800;cursor:pointer;">✅ Use This</button>
-    <button onclick="closeCropModal()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--sub);font-size:14px;cursor:pointer;">✕</button>
+  <div style="display:flex;gap:6px;margin-top:10px;width:100%;max-width:460px;flex-wrap:wrap;">
+    <button onclick="cropSizeChange(-40)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:16px;cursor:pointer;">🔍−</button>
+    <button onclick="cropSizeChange(40)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:16px;cursor:pointer;">🔍+</button>
+    <button onclick="saveCroppedImage()" style="flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:10px;color:#1A0533;font-size:13px;font-weight:800;cursor:pointer;">✂️ Crop & Save</button>
+    <button onclick="closeCropModal()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--sub);font-size:14px;cursor:pointer;">✕</button>
   </div>
-  <div style="font-size:11px;color:var(--sub);margin-top:8px;text-align:center;">Drag golden box · 🔍 to resize</div>
+  <button onclick="useFullImage()" style="margin-top:6px;width:100%;max-width:460px;background:rgba(46,204,113,0.15);border:1px solid var(--green);border-radius:10px;padding:10px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;">🖼️ Full Image use koro (crop na kore)</button>
+  <div style="font-size:11px;color:var(--sub);margin-top:6px;text-align:center;">Drag box to reposition · 🔍 to resize box</div>
 </div>
 
 
