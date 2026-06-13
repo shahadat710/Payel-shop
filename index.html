@@ -695,69 +695,67 @@ function renderProdsFiltered(){
     const mC=!_filterCat||p.category===_filterCat;
     return mQ&&mC;
   });
-  el.innerHTML=(cf.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No products found</div>`:cf.map(p=>{
-    const min=p.minStock||5;
-    const sc=p.stock<=0?"s-zero":p.stock<=min?"s-low":"s-ok";
-    const sl=p.stock<=0?"Out of Stock":p.stock<=min?"⚠️ Low":"OK";
-    const slColor=p.stock<=0?"var(--red)":p.stock<=min?"var(--gold2)":"var(--green)";
-    const profit=(p.sellPrice||0)-(p.buyPrice||0);
-    const icon=CI[p.category]||"📦";
-    const isExp=!!expandedProds[p.id];
-    const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>` :"";
-
-    const detailPanel=isExp?`<div style="padding:10px 12px 12px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
-      ${imgHtml}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
-        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:10px;color:var(--sub);">Buy Price</div>
-          <div style="font-size:14px;font-weight:700;">AED ${(p.buyPrice||0).toFixed(2)}</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:10px;color:var(--sub);">Sell Price</div>
-          <div style="font-size:14px;font-weight:700;color:var(--gold);">AED ${(p.sellPrice||0).toFixed(2)}</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:10px;color:var(--sub);">Profit/Unit</div>
-          <div style="font-size:14px;font-weight:700;color:${profit>=0?"var(--green)":"var(--red)"};">${profit>=0?"+":""}AED ${profit.toFixed(2)}</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:10px;color:var(--sub);">Stock</div>
-          <div style="font-size:14px;font-weight:700;color:${slColor};">${p.stock||0} ${p.unit||"pcs"}</div>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--sub);margin-bottom:4px;">📂 ${p.category||"Other"} ${p.barcode?"· 🔖 "+p.barcode:""}</div>
-      ${p.notes?`<div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📝 ${p.notes}</div>`:""}
-      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
-        <div style="display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:8px;padding:4px 8px;">
-          <button onclick="adjustStock('${p.id}',-1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">−</button>
-          <span style="font-size:14px;font-weight:700;min-width:24px;text-align:center;">${p.stock||0}</span>
-          <button onclick="adjustStock('${p.id}',1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">+</button>
-        </div>
-        <button class="btn-sell" onclick="openAddSale('${p.id}')" style="flex:1;">💸 Sell</button>
-        ${isEditor?`<button class="btn-ed" onclick="openEditProduct('${p.id}')">✏️</button>`:""}
-        ${isEditor?`<button onclick="openImageUpload('${p.id}')" style="background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;">🖼️</button>`:""}
-        ${isEditor?`<button class="btn-dl" onclick="deleteProduct('${p.id}')">🗑️</button>`:""}
-      </div>
-    </div>`:"";
-
-    return `<div class="product-card">
-      <div class="p-main" onclick="toggleProdExpand('${p.id}',event)" style="cursor:pointer;">
-        <div class="p-icon">${p.image?`<img src="${p.image}" style="width:38px;height:38px;border-radius:10px;object-fit:cover;">`:icon}</div>
-        <div class="p-info">
-          <div class="p-name">${p.name}</div>
-          <div class="p-sub">${p.category||"Other"}</div>
-          <div class="p-price">AED ${(p.sellPrice||0).toFixed(2)} <span style="color:${profit>=0?"var(--green)":"var(--red)"};font-size:11px;">${profit>=0?"+":""}AED ${profit.toFixed(2)} profit</span></div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
-          <span class="stock-badge ${sc}" style="color:${slColor};">${p.stock||0} ${p.unit||"pcs"}</span>
-          <span style="color:var(--sub);font-size:16px;transform:rotate(${isExp?"180":"0"}deg);transition:transform 0.2s;display:block;">⌄</span>
-        </div>
-      </div>
-      ${detailPanel}
-    </div>`;
-  }).join(""))+
-  (isEditor?'<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>':"");
+  let html="";
+  if(cf.length===0){
+    html='<div style="text-align:center;padding:40px;color:var(--sub);">No products found</div>';
+  } else {
+    cf.forEach(p=>{
+      const min=p.minStock||5;
+      const isLow=p.stock>0&&p.stock<=min;
+      const isOut=p.stock<=0;
+      const sc=isOut?"s-zero":isLow?"s-low":"s-ok";
+      const sl=isOut?"Out of Stock":isLow?"⚠️ "+p.stock:p.stock+" "+(p.unit||"pcs");
+      const slColor=isOut?"var(--red)":isLow?"var(--gold2)":"var(--green)";
+      const profit=(p.sellPrice||0)-(p.buyPrice||0);
+      const icon=CI[p.category]||"📦";
+      const isExp=!!expandedProds[p.id];
+      const imgTag=p.image?'<img src="'+p.image+'" style="width:38px;height:38px;border-radius:10px;object-fit:cover;">':icon;
+      const profitSpan=p.buyPrice?(' <span style="color:'+(profit>=0?"var(--green)":"var(--red)")+';font-size:11px;">'+(profit>=0?"+":"")+"AED "+profit.toFixed(2)+"</span>"):"";
+      let card='<div class="product-card">';
+      card+='<div class="p-main" onclick="toggleProdExpand(''+p.id+'',event)" style="cursor:pointer;">';
+      card+='<div class="p-icon">'+imgTag+'</div>';
+      card+='<div class="p-info">';
+      card+='<div class="p-name">'+p.name+'</div>';
+      card+='<div class="p-sub">'+(p.category||"Other")+'</div>';
+      card+='<div class="p-price">AED '+(p.sellPrice||0).toFixed(2)+profitSpan+'</div>';
+      card+='</div>';
+      card+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">';
+      card+='<span class="stock-badge '+sc+'" style="color:'+slColor+';">'+sl+'</span>';
+      card+='<span style="color:var(--sub);font-size:18px;transform:rotate('+(isExp?"180":"0")+'deg);display:block;">⌄</span>';
+      card+='</div></div>';
+      if(isExp){
+        card+='<div style="padding:10px 12px 12px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">';
+        if(p.image)card+='<img src="'+p.image+'" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>';
+        card+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">';
+        card+='<div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Buy Price</div><div style="font-size:14px;font-weight:700;">AED '+(p.buyPrice||0).toFixed(2)+'</div></div>';
+        card+='<div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Sell Price</div><div style="font-size:14px;font-weight:700;color:var(--gold);">AED '+(p.sellPrice||0).toFixed(2)+'</div></div>';
+        card+='<div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:700;color:'+(profit>=0?"var(--green)":"var(--red)")+';">'+(profit>=0?"+":"")+"AED "+profit.toFixed(2)+'</div></div>';
+        card+='<div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Stock</div><div style="font-size:14px;font-weight:700;color:'+slColor+';">'+(p.stock||0)+' '+(p.unit||"pcs")+'</div></div>';
+        card+='</div>';
+        card+='<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">📂 '+(p.category||"Other")+(p.barcode?" · 🔖 "+p.barcode:"")+'</div>';
+        if(p.notes)card+='<div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📝 '+p.notes+'</div>';
+        card+='<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">';
+        card+='<div style="display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:8px;padding:4px 8px;">';
+        card+='<button onclick="adjustStock(''+p.id+'',-1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">−</button>';
+        card+='<span style="font-size:14px;font-weight:700;min-width:24px;text-align:center;">'+(p.stock||0)+'</span>';
+        card+='<button onclick="adjustStock(''+p.id+'',1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">+</button>';
+        card+='</div>';
+        card+='<button class="btn-sell" onclick="openAddSale(''+p.id+'')" style="flex:1;">💸 Sell</button>';
+        if(isEditor){
+          card+='<button class="btn-ed" onclick="openEditProduct(''+p.id+'')">✏️</button>';
+          card+='<button onclick="openImgPicker('prod',''+p.id+'')" style="background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;">🖼️</button>';
+          card+='<button class="btn-dl" onclick="deleteProduct(''+p.id+'')">🗑️</button>';
+        }
+        card+='</div></div>';
+      }
+      card+='</div>';
+      html+=card;
+    });
+  }
+  if(isEditor)html+='<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>';
+  el.innerHTML=html;
 }
+
 
 function renderAll(){
   if(!isEditor&&!isViewer)return;
@@ -824,8 +822,8 @@ function setSaleDateFilter(f,customDate){
   if(customDate)_saleCustomDate=customDate;
   renderSales();
 }
-function renderSales(){const area=document.getElementById("mainContent");if(!area)return;
-  // Get month sales then apply date filter
+function renderSales(){
+  const area=document.getElementById("mainContent");if(!area)return;
   let ms=sales.filter(s=>s.monthKey===getMonth());
   const today=new Date().toISOString().split("T")[0];
   const filterVal=document.getElementById("saleDateFilterSel")?.value||"all";
@@ -833,42 +831,142 @@ function renderSales(){const area=document.getElementById("mainContent");if(!are
   else if(filterVal==="week"){const w=new Date();w.setDate(w.getDate()-7);const ws=w.toISOString().split("T")[0];ms=ms.filter(s=>s.date>=ws);}
   else if(filterVal==="custom"){const cv=document.getElementById("saleDateCustom")?.value;if(cv)ms=ms.filter(s=>s.date===cv);}
   ms=ms.sort((a,b)=>b.date.localeCompare(a.date));
-  const rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);const cards=ms.map(s=>`<div class="sale-card"><div class="sale-date-box">${s.date?s.date.slice(5).replace("-","/"):"—"}<br><span style="font-size:9px;color:var(--sub);">${MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||""}</span></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">${s.productName}</div><div style="font-size:11px;color:var(--sub);margin-top:1px;">${s.qty}${s.customer?" · "+s.customer:""}${s.phone?" · 📞"+s.phone:""} · ${s.payment}</div>${s.notes?`<div style="font-size:10px;color:var(--sub);">${s.notes}</div>`:""}</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${(s.total||0).toFixed(2)}</div><div style="font-size:10px;color:var(--blue);">+${(s.profit||0).toFixed(2)}</div>${s.payment==="due"?'<div style="font-size:10px;color:var(--gold2);font-weight:700;">⚠️ Due</div>':""}<div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">${s.payment==="due"?`<button onclick="sendCreditWA('${s.id}')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>`:""}${isEditor?`<button onclick="openEditSale('${s.id}')" style="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;">✏️</button>`:""}${isEditor?`<button onclick="deleteSale('${s.id}')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>`:""}</div></div></div>`).join("");area.innerHTML=`<div style="padding:6px 12px 4px;display:flex;gap:6px;align-items:center;">
-    <select id="saleDateFilterSel" onchange="renderSales()" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 8px;color:var(--text);font-size:12px;outline:none;-webkit-appearance:none;">
-      <option value="all">📅 All (This Month)</option>
-      <option value="today">📌 Today</option>
-      <option value="week">📆 Last 7 Days</option>
-      <option value="custom">🗓️ Custom Date</option>
-    </select>
-    <input type="date" id="saleDateCustom" onchange="renderSales()" style="display:none;flex:1;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;" />
-  </div>
-  <div style="padding:0 12px 4px;display:flex;gap:6px;"><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${rev.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:800;color:var(--blue);">AED ${profit.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:14px;font-weight:800;color:var(--gold);">${ms.length}</div></div></div><div class="content-area">${ms.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No sales this month</div>`:cards}${isEditor?'<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>':""}</div>`;}
+  const rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);
+  let html='';
+  html+='<div style="padding:6px 12px 4px;display:flex;gap:6px;align-items:center;">';
+  html+='<select id="saleDateFilterSel" onchange="renderSales()" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 8px;color:var(--text);font-size:12px;outline:none;-webkit-appearance:none;">';
+  html+='<option value="all">📅 All (This Month)</option>';
+  html+='<option value="today">📌 Today</option>';
+  html+='<option value="week">📆 Last 7 Days</option>';
+  html+='<option value="custom">🗓️ Custom Date</option>';
+  html+='</select>';
+  html+='<input type="date" id="saleDateCustom" onchange="renderSales()" style="display:none;flex:1;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;" /></div>';
+  html+='<div style="padding:0 12px 4px;display:flex;gap:6px;">';
+  html+='<div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:14px;font-weight:800;color:var(--green);">AED '+rev.toFixed(0)+'</div></div>';
+  html+='<div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:800;color:var(--blue);">AED '+profit.toFixed(0)+'</div></div>';
+  html+='<div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:14px;font-weight:800;color:var(--gold);">'+ms.length+'</div></div></div>';
+  html+='<div class="content-area">';
+  if(ms.length===0){
+    html+='<div style="text-align:center;padding:40px;color:var(--sub);">No sales found</div>';
+  } else {
+    ms.forEach(s=>{
+      html+='<div class="sale-card">';
+      html+='<div class="sale-date-box">'+(s.date?s.date.slice(5).replace("-","/"):"—")+'<br><span style="font-size:9px;color:var(--sub);">'+(MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||"")+'</span></div>';
+      html+='<div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+s.productName+'</div>';
+      html+='<div style="font-size:11px;color:var(--sub);margin-top:1px;">'+s.qty+(s.customer?" · "+s.customer:"")+(s.phone?" · 📞"+s.phone:"")+" · "+s.payment+'</div>';
+      if(s.notes)html+='<div style="font-size:10px;color:var(--sub);">'+s.notes+'</div>';
+      html+='</div>';
+      html+='<div style="text-align:right;flex-shrink:0;">';
+      html+='<div style="font-size:14px;font-weight:800;color:var(--green);">AED '+(s.total||0).toFixed(2)+'</div>';
+      html+='<div style="font-size:10px;color:var(--blue);">+'+(s.profit||0).toFixed(2)+'</div>';
+      if(s.payment==="due")html+='<div style="font-size:10px;color:var(--gold2);font-weight:700;">⚠️ Due</div>';
+      html+='<div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">';
+      if(s.payment==="due")html+='<button onclick="sendCreditWA(''+s.id+'')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>';
+      if(isEditor)html+='<button onclick="openEditSale(''+s.id+'')" style="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;">✏️</button>';
+      if(isEditor)html+='<button onclick="deleteSale(''+s.id+'')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>';
+      html+='</div></div></div>';
+    });
+  }
+  if(isEditor)html+='<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>';
+  html+='</div>';
+  area.innerHTML=html;
+  // Handle custom date visibility
+  setTimeout(()=>{
+    const fs=document.getElementById("saleDateFilterSel");
+    const ci=document.getElementById("saleDateCustom");
+    if(fs&&ci)ci.style.display=fs.value==="custom"?"block":"none";
+  },10);
+}
 
-function renderPurchases(){const area=document.getElementById("mainContent");if(!area)return;const now=new Date();let filtered=purchases;if(purchaseFilter==="month")filtered=purchases.filter(p=>p.monthKey===getMonth());else if(purchaseFilter==="last"){const lm=now.getMonth()===0?11:now.getMonth()-1,ly=now.getMonth()===0?now.getFullYear()-1:now.getFullYear();filtered=purchases.filter(p=>p.monthKey===ly+"-"+String(lm+1).padStart(2,"0"));}filtered=filtered.sort((a,b)=>b.date.localeCompare(a.date));const ts=filtered.reduce((a,p)=>a+(p.total||0),0);const grouped={};filtered.forEach(p=>{if(!grouped[p.date])grouped[p.date]=[];grouped[p.date].push(p);});let gHtml=Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date=>{const items=grouped[date],dt=items.reduce((s,p)=>s+(p.total||0),0),d=new Date(date+"T00:00:00"),ds=d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),isOpen=!!purchaseExpanded[date];let inner=isOpen?`<div style="border-top:1px solid var(--bg);">${items.map(p=>`<div class="pur-item"><div style="flex:1;"><div style="font-size:13px;font-weight:600;">📦 ${p.productName}</div><div style="font-size:11px;color:var(--sub);">${p.supplier?"👤 "+p.supplier+(p.supPhone?" "+p.supPhone:"")+"<br>":""}${p.qty} pcs${p.notes?"<br>"+p.notes:""}</div></div><div style="text-align:right;"><div style="color:var(--green);font-weight:700;font-size:13px;">AED ${(p.total||0).toFixed(2)}</div><div style="display:flex;gap:4px;margin-top:2px;justify-content:flex-end;">${isEditor?`<button onclick="event.stopPropagation();openEditPurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">✏️</button>`:""}${isEditor?`<button onclick="event.stopPropagation();deletePurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">🗑️</button>`:""}</div></div></div>`).join("")}${isEditor?`<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--bg2);"><button onclick="event.stopPropagation();openAddPurchase()" style="background:rgba(255,215,0,0.1);border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:11px;padding:4px 12px;cursor:pointer;">+ Add Item</button></div>`:""}</div>`:"";return `<div class="pur-group"><div class="pur-header" onclick="togglePurDate('${date}')"><div><span style="font-size:13px;font-weight:700;color:var(--gold);">${ds}</span><span style="font-size:11px;color:var(--sub);margin-left:8px;">${items.length} item${items.length>1?"s":""}</span></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;color:var(--green);">AED ${dt.toFixed(2)}</span><span style="color:var(--sub);font-size:14px;display:inline-block;transform:rotate(${isOpen?"90":"0"}deg);">▶</span></div></div>${inner}</div>`;}).join("");area.innerHTML=`<div style="padding:4px 12px;display:flex;gap:6px;">${["all","month","last"].map((f,i)=>{const labels=["All","This Month","Last Month"],act=purchaseFilter===f;return `<button onclick="setPurFilter('${f}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid ${act?"var(--gold)":"var(--border)"};background:${act?"linear-gradient(135deg,var(--gold),var(--gold2))":"transparent"};color:${act?"#1A0533":"var(--sub)"};font-size:12px;font-weight:700;cursor:pointer;">${labels[i]}</button>`;}).join("")}</div><div style="background:var(--card);margin:4px 12px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-around;"><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Total Spent</div><div style="font-size:15px;font-weight:800;color:var(--red);">AED ${ts.toFixed(0)}</div></div><div style="width:1px;background:var(--border);"></div><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Records</div><div style="font-size:15px;font-weight:800;color:var(--gold);">${filtered.length}</div></div></div><div class="content-area">${filtered.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No purchase records</div>`:gHtml}${isEditor?'<button class="add-btn" onclick="openAddPurchase()">+ Add Purchase</button>':""}</div>`;}
 
-function renderDues(){const area=document.getElementById("mainContent");if(!area)return;const pending=dues.filter(d=>d.status!=="paid"),paidD=dues.filter(d=>d.status==="paid"),total=pending.reduce((a,d)=>a+(d.amount-d.paid),0);const pc=pending.map(d=>`<div style="background:var(--card);border:1px solid rgba(231,76,60,0.35);border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;"><div style="font-size:24px;">👤</div><div style="flex:1;"><div style="font-size:14px;font-weight:700;">${d.customer}</div>${d.productName?`<div style="font-size:11px;color:var(--accent2);">${d.productName}</div>`:""}<div style="font-size:11px;color:var(--sub);">${d.date}${d.phone?" · 📞"+d.phone:""}</div></div><div style="text-align:right;"><div style="font-size:15px;font-weight:800;color:var(--red);">AED ${(d.amount-d.paid).toFixed(2)}</div><div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end;"><button onclick="sendDueWA('${d.id}')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:5px 8px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>${isEditor?`<button onclick="markDuePaid('${d.id}')" style="background:rgba(46,204,113,0.15);border:1px solid var(--green);border-radius:6px;padding:5px 8px;color:var(--green);font-size:12px;cursor:pointer;">✅</button>`:""}${isEditor?`<button onclick="deleteDue('${d.id}')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>`:""}</div></div></div>`).join("");area.innerHTML=`<div style="padding:6px 12px 4px;"><div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Total Pending</div><div style="font-size:20px;font-weight:800;color:var(--red);">AED ${total.toFixed(2)}</div></div></div><div class="content-area">${pending.length===0?`<div style="text-align:center;padding:30px;color:var(--sub);">🎉 No pending dues!</div>`:pc}${paidD.length>0?`<div style="font-size:10px;color:var(--sub);font-weight:700;letter-spacing:1px;padding:8px 0 4px;">PAID</div>`+paidD.slice(-10).map(d=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:5px;padding:8px 12px;display:flex;align-items:center;opacity:0.7;"><div style="flex:1;font-size:12px;">${d.customer}</div><span style="font-size:12px;color:var(--green);font-weight:700;">✅ AED ${d.amount.toFixed(2)}</span></div>`).join(""):""}</div>`;}
+function renderPurchases(){const area=document.getElementById("mainContent");if(!area)return;const now=new Date();let filtered=purchases;if(purchaseFilter==="month")filtered=purchases.filter(p=>p.monthKey===getMonth());else if(purchaseFilter==="last"){const lm=now.getMonth()===0?11:now.getMonth()-1,ly=now.getMonth()===0?now.getFullYear()-1:now.getFullYear();filtered=purchases.filter(p=>p.monthKey===ly+"-"+String(lm+1).padStart(2,"0"));}filtered=filtered.sort((a,b)=>b.date.localeCompare(a.date));const ts=filtered.reduce((a,p)=>a+(p.total||0),0);const grouped={};filtered.forEach(p=>{if(!grouped[p.date])grouped[p.date]=[];grouped[p.date].push(p);});let gHtml=Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date=>{const items=grouped[date],dt=items.reduce((s,p)=>s+(p.total||0),0),d=new Date(date+"T00:00:00"),ds=d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),isOpen=!!purchaseExpanded[date];let inner=isOpen?`<div style="border-top:1px solid var(--bg);">${items.map(p=>`<div class="pur-item"><div style="flex:1;"><div style="font-size:13px;font-weight:600;">📦 ${p.productName}</div><div style="font-size:11px;color:var(--sub);">${p.supplier?"👤 "+p.supplier+(p.supPhone?" "+p.supPhone:"")+"<br>":""}${p.qty} pcs${p.notes?"<br>"+p.notes:""}</div></div><div style="text-align:right;"><div style="color:var(--green);font-weight:700;font-size:13px;">AED ${(p.total||0).toFixed(2)}</div><div style="display:flex;gap:4px;margin-top:2px;justify-content:flex-end;">${isEditor?'<button onclick="event.stopPropagation();openEditPurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">✏️</button>':""}${isEditor?'<button onclick="event.stopPropagation();deletePurchase('${p.id}')" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px;">🗑️</button>':""}</div></div></div>`).join("")}${isEditor?'<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--bg2);"><button onclick="event.stopPropagation();openAddPurchase()" style="background:rgba(255,215,0,0.1);border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:11px;padding:4px 12px;cursor:pointer;">+ Add Item</button></div>':""}</div>`:"";return `<div class="pur-group"><div class="pur-header" onclick="togglePurDate('${date}')"><div><span style="font-size:13px;font-weight:700;color:var(--gold);">${ds}</span><span style="font-size:11px;color:var(--sub);margin-left:8px;">${items.length} item${items.length>1?"s":""}</span></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;color:var(--green);">AED ${dt.toFixed(2)}</span><span style="color:var(--sub);font-size:14px;display:inline-block;transform:rotate(${isOpen?"90":"0"}deg);">▶</span></div></div>${inner}</div>`;}).join("");area.innerHTML=`<div style="padding:4px 12px;display:flex;gap:6px;">${["all","month","last"].map((f,i)=>{const labels=["All","This Month","Last Month"],act=purchaseFilter===f;return `<button onclick="setPurFilter('${f}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid ${act?"var(--gold)":"var(--border)"};background:${act?"linear-gradient(135deg,var(--gold),var(--gold2))":"transparent"};color:${act?"#1A0533":"var(--sub)"};font-size:12px;font-weight:700;cursor:pointer;">${labels[i]}</button>`;}).join("")}</div><div style="background:var(--card);margin:4px 12px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-around;"><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Total Spent</div><div style="font-size:15px;font-weight:800;color:var(--red);">AED ${ts.toFixed(0)}</div></div><div style="width:1px;background:var(--border);"></div><div style="text-align:center;padding:10px;"><div style="font-size:9px;color:var(--sub);">Records</div><div style="font-size:15px;font-weight:800;color:var(--gold);">${filtered.length}</div></div></div><div class="content-area">${filtered.length===0?"<div style=\"text-align:center;padding:40px;color:var(--sub);\">No purchase records</div>":gHtml}${isEditor?'<button class="add-btn" onclick="openAddPurchase()">+ Add Purchase</button>':""}</div>`;}
 
-function renderReport(){const area=document.getElementById("mainContent");if(!area)return;const ms=sales.filter(s=>s.monthKey===getMonth()),rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);const cM={},pM={},pyM={cash:0,card:0,due:0,online:0};ms.forEach(s=>{cM[s.category||"Other"]=(cM[s.category||"Other"]||0)+(s.total||0);pM[s.productName]=(pM[s.productName]||0)+(s.qty||0);pyM[s.payment]=(pyM[s.payment]||0)+(s.total||0);});const tCats=Object.entries(cM).sort((a,b)=>b[1]-a[1]).slice(0,5),tProds=Object.entries(pM).sort((a,b)=>b[1]-a[1]).slice(0,5),tCost=purchases.filter(p=>p.monthKey===getMonth()).reduce((a,p)=>a+(p.total||0),0),lowP=products.filter(p=>(p.stock||0)<=(p.minStock||5)&&(p.stock||0)>0);area.innerHTML=`<div class="content-area"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;"><div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:16px;font-weight:800;color:var(--green);">AED ${rev.toFixed(0)}</div></div><div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:16px;font-weight:800;color:var(--blue);">AED ${profit.toFixed(0)}</div></div><div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:16px;font-weight:800;color:var(--gold);">${ms.length}</div></div><div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Purchases</div><div style="font-size:16px;font-weight:800;color:var(--red);">AED ${tCost.toFixed(0)}</div></div></div>${lowP.length?`<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:6px;">⚠️ Low Stock</div>${lowP.map(p=>`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;"><span>${p.name}</span><span style="color:var(--red);font-weight:700;">${p.stock}/${p.minStock}</span></div>`).join("")}</div>`:""}${tCats.length?`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">📊 By Category</div>${tCats.map(([cat,r])=>{const pct=rev>0?(r/rev*100).toFixed(0):0;return `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;"><span>${cat}</span><span style="color:var(--gold);font-weight:700;">AED ${r.toFixed(0)} (${pct}%)</span></div><div style="background:var(--bg);border-radius:4px;height:5px;"><div style="background:linear-gradient(90deg,var(--accent),var(--blue));height:100%;width:${pct}%;border-radius:4px;"></div></div></div>`;}).join("")}</div>`:""}${tProds.length?`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">🏆 Top Products</div>${tProds.map(([name,qty],i)=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg);font-size:12px;"><span><span style="color:var(--gold);font-weight:800;margin-right:6px;">${i+1}</span>${name}</span><span style="color:var(--sub);">${qty} sold</span></div>`).join("")}</div>`:""}${Object.entries(pyM).filter(([,v])=>v>0).length?`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">💳 Payments</div>${Object.entries(pyM).filter(([,v])=>v>0).map(([m,a])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--bg);"><span style="color:var(--sub);text-transform:capitalize;">💰 ${m}</span><span style="font-weight:700;">AED ${a.toFixed(2)}</span></div>`).join("")}</div>`:""}${products.length?`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">📦 Stock</div>${products.sort((a,b)=>(a.stock||0)-(b.stock||0)).map(p=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--bg);"><span>${p.name}</span><span style="color:${p.stock<=0?"var(--red)":p.stock<=(p.minStock||5)?"var(--gold2)":"var(--green)"};font-weight:700;">${p.stock||0}</span></div>`).join("")}</div>`:""}${ms.length===0&&products.length===0?`<div style="text-align:center;padding:30px;color:var(--sub);">No data yet</div>`:""}</div>`;}
-
-function renderAI(){
+function renderDues(){
   const area=document.getElementById("mainContent");if(!area)return;
-  area.innerHTML=`<div class="content-area"><div class="ai-card"><div class="ai-title">🤖 AI Shop Analysis — ${MF[selectedMonthNum-1]} ${selectedYear}</div><div id="aiContent"><div style="text-align:center;padding:20px;color:var(--sub);">Click Analyze to get insights</div></div></div><button onclick="loadAIAnalysis()" style="width:100%;padding:13px;background:linear-gradient(135deg,rgba(156,39,176,0.3),rgba(124,77,255,0.3));border:1px solid var(--accent);border-radius:14px;color:var(--accent2);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">🔄 Analyze My Shop</button><div class="ai-card" style="border-color:rgba(124,77,255,0.3);"><div class="ai-title" style="color:var(--blue);">📊 Quick Stats</div><div id="quickStats"></div></div></div>`;
-  // Quick stats
+  const pending=dues.filter(d=>d.status!=="paid"),paidD=dues.filter(d=>d.status==="paid");
+  const total=pending.reduce((a,d)=>a+(d.amount-d.paid),0);
+  let html='<div style="padding:6px 12px 4px;"><div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:10px;color:var(--sub);">Total Pending</div><div style="font-size:20px;font-weight:800;color:var(--red);">AED '+total.toFixed(2)+'</div></div></div>';
+  html+='<div class="content-area">';
+  if(pending.length===0){
+    html+='<div style="text-align:center;padding:30px;color:var(--sub);">🎉 No pending dues!</div>';
+  } else {
+    pending.forEach(d=>{
+      html+='<div style="background:var(--card);border:1px solid rgba(231,76,60,0.35);border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">';
+      html+='<div style="font-size:24px;">👤</div>';
+      html+='<div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+d.customer+'</div>';
+      if(d.productName)html+='<div style="font-size:11px;color:var(--accent2);">'+d.productName+'</div>';
+      html+='<div style="font-size:11px;color:var(--sub);">'+d.date+(d.phone?" · 📞"+d.phone:"")+'</div></div>';
+      html+='<div style="text-align:right;"><div style="font-size:15px;font-weight:800;color:var(--red);">AED '+(d.amount-d.paid).toFixed(2)+'</div>';
+      html+='<div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end;">';
+      html+='<button onclick="sendDueWA(''+d.id+'')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:5px 8px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>';
+      if(isEditor)html+='<button onclick="markDuePaid(''+d.id+'')" style="background:rgba(46,204,113,0.15);border:1px solid var(--green);border-radius:6px;padding:5px 8px;color:var(--green);font-size:12px;cursor:pointer;">✅</button>';
+      if(isEditor)html+='<button onclick="deleteDue(''+d.id+'')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>';
+      html+='</div></div></div>';
+    });
+  }
+  if(paidD.length>0){
+    html+='<div style="font-size:10px;color:var(--sub);font-weight:700;letter-spacing:1px;padding:8px 0 4px;">PAID</div>';
+    paidD.slice(-10).forEach(d=>{
+      html+='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:5px;padding:8px 12px;display:flex;align-items:center;opacity:0.7;">';
+      html+='<div style="flex:1;font-size:12px;">'+d.customer+'</div>';
+      html+='<span style="font-size:12px;color:var(--green);font-weight:700;">✅ AED '+d.amount.toFixed(2)+'</span></div>';
+    });
+  }
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+
+function renderReport(){
+  const area=document.getElementById("mainContent");if(!area)return;
   const ms=sales.filter(s=>s.monthKey===getMonth());
   const rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);
-  const margin=rev>0?((profit/rev)*100).toFixed(1):0;
-  const avgSale=ms.length>0?(rev/ms.length).toFixed(2):0;
-  const qs=document.getElementById("quickStats");
-  if(qs)qs.innerHTML=[
-    `<div class="ai-item">📅 Month: <strong>${MF[selectedMonthNum-1]} ${selectedYear}</strong></div>`,
-    `<div class="ai-item">💰 Revenue: <strong style="color:var(--green);">AED ${rev.toFixed(2)}</strong></div>`,
-    `<div class="ai-item">📈 Profit: <strong style="color:var(--blue);">AED ${profit.toFixed(2)}</strong> (${margin}% margin)</div>`,
-    `<div class="ai-item">🛒 Orders: <strong>${ms.length}</strong> | Avg: AED ${avgSale}</div>`,
-    `<div class="ai-item">📦 Products: <strong>${products.length}</strong> total</div>`,
-    `<div class="ai-item">⚠️ Low Stock: <strong style="color:var(--gold2);">${products.filter(p=>(p.stock||0)<=(p.minStock||5)&&p.stock>0).length}</strong> items</div>`,
-    `<div class="ai-item">🔴 Out of Stock: <strong style="color:var(--red);">${products.filter(p=>(p.stock||0)===0).length}</strong> items</div>`,
-    `<div class="ai-item">💳 Pending Dues: <strong style="color:var(--red);">AED ${dues.filter(d=>d.status!=="paid").reduce((a,d)=>a+(d.amount-d.paid),0).toFixed(2)}</strong></div>`,
-  ].join("");
+  const cM={},pM={},pyM={cash:0,card:0,due:0,online:0};
+  ms.forEach(s=>{cM[s.category||"Other"]=(cM[s.category||"Other"]||0)+(s.total||0);pM[s.productName]=(pM[s.productName]||0)+(s.qty||0);pyM[s.payment]=(pyM[s.payment]||0)+(s.total||0);});
+  const tCats=Object.entries(cM).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const tProds=Object.entries(pM).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const tCost=purchases.filter(p=>p.monthKey===getMonth()).reduce((a,p)=>a+(p.total||0),0);
+  const lowP=products.filter(p=>(p.stock||0)<=(p.minStock||5)&&(p.stock||0)>0);
+  let h='<div class="content-area">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">';
+  h+='<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:16px;font-weight:800;color:var(--green);">AED '+rev.toFixed(0)+'</div></div>';
+  h+='<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:16px;font-weight:800;color:var(--blue);">AED '+profit.toFixed(0)+'</div></div>';
+  h+='<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:16px;font-weight:800;color:var(--gold);">'+ms.length+'</div></div>';
+  h+='<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Purchases</div><div style="font-size:16px;font-weight:800;color:var(--red);">AED '+tCost.toFixed(0)+'</div></div>';
+  h+='</div>';
+  if(lowP.length){
+    h+='<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:8px;">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:6px;">\u26a0\ufe0f Low Stock</div>';
+    lowP.forEach(function(p){h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;"><span>'+p.name+'</span><span style="color:var(--red);font-weight:700;">'+p.stock+'/'+p.minStock+'</span></div>';});
+    h+='</div>';
+  }
+  if(tCats.length){
+    h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">\ud83d\udcca By Category</div>';
+    tCats.forEach(function(e){var cat=e[0],r=e[1];var pct=rev>0?(r/rev*100).toFixed(0):0;h+='<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;"><span>'+cat+'</span><span style="color:var(--gold);font-weight:700;">AED '+r.toFixed(0)+' ('+pct+'%)</span></div><div style="background:var(--bg);border-radius:4px;height:5px;"><div style="background:linear-gradient(90deg,var(--accent),var(--blue));height:100%;width:'+pct+'%;border-radius:4px;"></div></div></div>';});
+    h+='</div>';
+  }
+  if(tProds.length){
+    h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">\ud83c\udfc6 Top Products</div>';
+    tProds.forEach(function(e,i){var name=e[0],qty=e[1];h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg);font-size:12px;"><span><span style="color:var(--gold);font-weight:800;margin-right:6px;">'+(i+1)+'</span>'+name+'</span><span style="color:var(--sub);">'+qty+' sold</span></div>';});
+    h+='</div>';
+  }
+  var payE=Object.entries(pyM).filter(function(e){return e[1]>0;});
+  if(payE.length){
+    h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">\ud83d\udcb3 Payments</div>';
+    payE.forEach(function(e){var m=e[0],a=e[1];h+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--bg);"><span style="color:var(--sub);text-transform:capitalize;">\ud83d\udcb0 '+m+'</span><span style="font-weight:700;">AED '+a.toFixed(2)+'</span></div>';});
+    h+='</div>';
+  }
+  if(products.length){
+    h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">\ud83d\udce6 Stock</div>';
+    products.slice().sort(function(a,b){return (a.stock||0)-(b.stock||0);}).forEach(function(p){var c=p.stock<=0?"var(--red)":p.stock<=(p.minStock||5)?"var(--gold2)":"var(--green)";h+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--bg);"><span>'+p.name+'</span><span style="color:'+c+';font-weight:700;">'+(p.stock||0)+'</span></div>';});
+    h+='</div>';
+  }
+  h+='</div>';
+  area.innerHTML=h;
 }
 
 function manageModals(){document.getElementById("addProductModal").style.display=addProductOpen?"flex":"none";document.getElementById("editProductModal").style.display=editProduct?"flex":"none";document.getElementById("addSaleModal").style.display=addSaleOpen?"flex":"none";document.getElementById("addPurchaseModal").style.display=addPurchaseOpen?"flex":"none";if(addProductOpen){const el=document.getElementById("pCategory");if(el){const cv=el.value||getCats()[0];el.innerHTML=buildCatOpts(cv);}}if(editProduct){const el=document.getElementById("epCategory");if(el){const cv=el.value||editProduct?.category;el.innerHTML=buildCatOpts(cv);}}}
