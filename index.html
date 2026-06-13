@@ -7,42 +7,75 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<link rel="manifest" href="manifest.json"/>
 <title>Payel Shop</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{background:#0A1628;color:#F0F0F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+body{background:#0A1628;color:#F0F0F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s;}
+
+/* LIGHT MODE */
+body.light{background:#F0F4F8;color:#0A1628;}
+body.light .header{background:linear-gradient(135deg,#1a3a5c,#2a5a8c);}
+body.light .stat-box{background:#fff;border-color:#ddd;}
+body.light .product-card,body.light .sale-card{background:#fff;border-color:#ddd;}
+body.light .modal{background:#fff;}
+body.light .modal input,body.light .modal select,body.light .modal textarea{background:#f5f5f5;border-color:#ddd;color:#0A1628;}
+body.light .tab-bar{background:#dde4ed;}
+body.light .date-select{background:#fff;color:#0A1628;border-color:#ddd;}
+body.light .search-input{background:#fff;color:#0A1628;border-color:#ddd;}
+body.light .calc-box{background:#f0f4f8;border-color:#ddd;}
+body.light select option{background:#fff;color:#0A1628;}
+
+/* LOGIN */
 #loginScreen{position:fixed;inset:0;background:#0A1628;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;padding:24px;}
+body.light #loginScreen{background:#F0F4F8;}
 #loginScreen h2{color:#FFD700;font-size:24px;font-weight:800;text-align:center;}
 #loginScreen p{color:#888;font-size:13px;text-align:center;}
-.login-input{width:100%;max-width:300px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:15px;color:#fff;font-size:16px;outline:none;}
+.login-input{width:100%;max-width:300px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;}
 .login-input:focus{border-color:#FFD700;}
 #loginError{color:#E74C3C;font-size:13px;display:none;}
 .login-btn{width:100%;max-width:300px;background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:14px;padding:15px;color:#0A1628;font-size:16px;font-weight:800;cursor:pointer;}
 .view-btn{width:100%;max-width:300px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:13px;color:#888;font-size:14px;cursor:pointer;}
-#notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1E8449;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;}
-#notifErr{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#C0392B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;}
-.header{background:linear-gradient(135deg,#0A1628,#1A2F4A);padding:14px 16px;border-bottom:1px solid #1E3A5F;position:sticky;top:0;z-index:10;}
+
+/* NOTIF */
+#notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1E8449;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;max-width:90%;}
+#notifErr{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#C0392B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9999;white-space:nowrap;max-width:90%;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0A1628,#1A2F4A);padding:12px 16px;border-bottom:1px solid #1E3A5F;position:sticky;top:0;z-index:10;}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.header h1{font-size:18px;font-weight:800;color:#FFD700;}
-.header-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
-.hbtn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#888;font-size:11px;font-weight:700;cursor:pointer;}
-.lock-btn{background:rgba(255,255,255,0.06);border:none;border-radius:8px;padding:6px 12px;color:#888;font-size:12px;cursor:pointer;}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px;}
-.stat-box{background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:10px 6px;text-align:center;}
-.stat-val{font-size:16px;font-weight:800;color:#FFD700;}
+.header h1{font-size:17px;font-weight:800;color:#FFD700;}
+.header-btns{display:flex;gap:5px;flex-wrap:wrap;}
+.hbtn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 9px;color:#888;font-size:11px;font-weight:700;cursor:pointer;}
+
+/* CALENDAR BAR */
+.cal-bar{display:flex;gap:4px;overflow-x:auto;padding:6px 12px 4px;scrollbar-width:none;}
+.cal-bar::-webkit-scrollbar{display:none;}
+.cal-day{flex-shrink:0;width:40px;text-align:center;border-radius:10px;padding:5px 2px;cursor:pointer;background:#0F1E35;border:1px solid #1E3A5F;}
+.cal-day.today{border-color:#FFD700;}
+.cal-day.selected{background:#FFD700;border-color:#FFD700;}
+.cal-day.selected .cd-num,.cal-day.selected .cd-day{color:#0A1628;}
+.cd-day{font-size:9px;color:#666;font-weight:600;}
+.cd-num{font-size:14px;font-weight:800;color:#F0F0F0;line-height:1.2;}
+.cd-dot{width:4px;height:4px;border-radius:50%;background:#27AE60;margin:2px auto 0;display:none;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px;}
+.stat-box{background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:8px 4px;text-align:center;}
+.stat-val{font-size:14px;font-weight:800;color:#FFD700;}
 .stat-lbl{font-size:10px;color:#666;margin-top:2px;}
-.tabs{padding:0 12px 8px;}
+
+/* TABS */
+.tabs{padding:0 12px 6px;}
 .tab-bar{display:flex;background:#0F1E35;border-radius:12px;padding:4px;gap:4px;overflow-x:auto;scrollbar-width:none;}
 .tab-bar::-webkit-scrollbar{display:none;}
-.tab-btn{flex-shrink:0;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:#888;transition:all 0.2s;white-space:nowrap;}
+.tab-btn{flex-shrink:0;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:#888;white-space:nowrap;}
+
+/* CARDS */
 .content-area{padding:0 12px 90px;}
 .product-card{background:#0F1E35;border:1px solid #1E3A5F;border-radius:16px;margin-bottom:10px;overflow:hidden;}
-.product-header{display:flex;align-items:center;gap:10px;padding:12px 14px;}
-.product-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:rgba(255,215,0,0.1);}
-.product-info{flex:1;}
-.product-name{font-size:15px;font-weight:700;color:#F0F0F0;}
+.product-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;background:rgba(255,215,0,0.1);}
+.product-name{font-size:15px;font-weight:700;}
 .product-cat{font-size:11px;color:#888;margin-top:2px;}
 .product-price{font-size:13px;color:#FFD700;font-weight:700;margin-top:2px;}
 .stock-badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700;}
@@ -50,94 +83,116 @@ body{background:#0A1628;color:#F0F0F0;font-family:-apple-system,BlinkMacSystemFo
 .stock-low{background:rgba(231,76,60,0.2);color:#E74C3C;border:1px solid #E74C3C;}
 .stock-zero{background:rgba(150,150,150,0.2);color:#aaa;border:1px solid #555;}
 .sale-card{background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
-.sale-date{background:#1A3050;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#FFD700;text-align:center;min-width:52px;flex-shrink:0;}
-.sale-info{flex:1;}
-.sale-product{font-size:14px;font-weight:700;}
-.sale-detail{font-size:12px;color:#888;margin-top:2px;}
-.sale-amount{font-size:15px;font-weight:800;color:#27AE60;}
-.sale-profit{font-size:11px;color:#3498DB;margin-top:1px;text-align:right;}
-.date-dropdowns{display:flex;gap:8px;padding:8px 12px 4px;}
-.date-select{flex:1;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:10px 8px;color:#F0F0F0;font-size:13px;font-weight:600;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;}
+.sale-date-box{background:#1A3050;border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:#FFD700;text-align:center;min-width:46px;flex-shrink:0;}
+
+/* PURCHASE CARDS (cig tracker style) */
+.purchase-group{border-radius:12px;overflow:hidden;background:#0F1E35;border:1px solid #1E3A5F;margin-bottom:8px;}
+.purchase-group-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;}
+.purchase-item{display:flex;align-items:center;padding:9px 14px;border-top:1px solid #0A1628;}
+
+/* DATE FILTER */
+.date-dropdowns{display:flex;gap:8px;padding:6px 12px 4px;}
+.date-select{flex:1;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:9px 8px;color:#F0F0F0;font-size:13px;font-weight:600;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;}
 .date-select:focus{border-color:#FFD700;}
+
+/* SEARCH */
 .search-wrap{padding:6px 12px 4px;}
 .search-wrap-inner{position:relative;}
-.search-input{width:100%;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:11px 16px 11px 40px;color:#F0F0F0;font-size:14px;outline:none;}
+.search-input{width:100%;background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:10px 16px 10px 38px;color:#F0F0F0;font-size:14px;outline:none;}
 .search-input:focus{border-color:#FFD700;}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;}
+
+/* ADD BTN */
 .add-btn{width:100%;background:rgba(255,215,0,0.08);border:1px dashed #FFD700;border-radius:14px;padding:14px;color:#FFD700;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+
+/* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:flex-end;justify-content:center;z-index:100;}
 .modal{background:#0F1E35;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
 .modal h3{font-size:17px;font-weight:800;margin-bottom:16px;color:#FFD700;}
 .modal label{font-size:12px;color:#888;display:block;margin-bottom:4px;margin-top:12px;}
-.modal input,.modal select,.modal textarea{width:100%;background:#0A1628;border:1px solid #1E3A5F;border-radius:10px;padding:12px;color:#F0F0F0;font-size:14px;outline:none;}
+.modal input,.modal select,.modal textarea{width:100%;background:#0A1628;border:1px solid #1E3A5F;border-radius:10px;padding:11px;color:#F0F0F0;font-size:14px;outline:none;}
 .modal textarea{resize:none;height:60px;}
 .modal input:focus,.modal select:focus{border-color:#FFD700;}
 .modal-btns{display:flex;gap:10px;margin-top:16px;}
 .btn-cancel{flex:1;background:#1A2F4A;border:none;border-radius:10px;padding:12px;color:#888;font-size:14px;cursor:pointer;}
 .btn-primary{flex:2;background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:10px;padding:12px;color:#0A1628;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-danger{background:rgba(231,76,60,0.2);border:1px solid #E74C3C;border-radius:10px;padding:12px;color:#E74C3C;font-size:14px;cursor:pointer;}
+
+/* CALC BOX */
 .calc-box{background:#080F1E;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-top:12px;}
 .calc-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
-.calc-row .lbl{color:#888;}
-.calc-row .val{font-weight:600;}
+.calc-lbl{color:#888;}
 .green{color:#27AE60;}
 .red{color:#E74C3C;}
 .gold{color:#FFD700;font-weight:800;}
-.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.rep-box{background:#080F1E;border-radius:10px;padding:10px;text-align:center;}
-.rep-val{font-size:18px;font-weight:800;color:#FFD700;}
-.rep-lbl{font-size:10px;color:#888;margin-top:2px;}
-#installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1A2F4A,#0F1E35);border-top:1px solid #FFD700;padding:14px 16px;z-index:200;flex-direction:row;align-items:center;gap:12px;}
-#scanModal{position:fixed;inset:0;background:#000;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;}
-#scanVideo{width:100%;max-width:400px;border-radius:12px;}
+
+/* INSTALL BANNER */
+#installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1A2F4A,#0F1E35);border-top:2px solid #FFD700;padding:12px 16px;z-index:200;flex-direction:row;align-items:center;gap:12px;}
+
+/* SHARE MODAL */
+#shareModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;align-items:center;justify-content:center;}
+#shareModalBox{background:#0F1E35;border-radius:20px;padding:20px;width:90%;max-width:380px;border:1px solid #1E3A5F;}
+
+/* SCANNER */
+#scanModal{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+
+/* VIEW ONLY BADGE */
+#viewOnlyBadge{display:none;position:fixed;bottom:70px;right:12px;background:#1A2F4A;border:1px solid #2A4A6B;color:#888;font-size:11px;padding:5px 10px;border-radius:20px;z-index:100;}
+
 select option{background:#0F1E35;}
+body.light select option{background:#fff;}
 </style>
 </head>
 <body>
-
 <div id="notif"></div>
 <div id="notifErr"></div>
+<div id="viewOnlyBadge">👁 View Only</div>
 
-<!-- SVG Logo -->
-<svg id="shopLogoSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="display:none">
-  <circle cx="50" cy="50" r="50" fill="#0A1628"/>
-  <text x="50" y="42" text-anchor="middle" font-size="32">💡</text>
-  <text x="50" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#FFD700" font-family="Arial">PAYEL</text>
-  <text x="50" y="82" text-anchor="middle" font-size="8" fill="#FFA500" font-family="Arial">SHOP</text>
-</svg>
-
-<!-- Install Banner -->
+<!-- INSTALL BANNER -->
 <div id="installBanner">
-  <div style="font-size:32px;">💡</div>
+  <div style="font-size:30px;">💡</div>
   <div style="flex:1;">
-    <div style="font-size:14px;font-weight:800;color:#FFD700;">Install Payel Shop</div>
-    <div style="font-size:11px;color:#888;">Home screen e add koro — logo sহ!</div>
+    <div style="font-size:13px;font-weight:800;color:#FFD700;">Install Payel Shop</div>
+    <div style="font-size:11px;color:#888;">Home screen e logo সহ add koro!</div>
   </div>
-  <button onclick="doInstall()" style="background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:10px;padding:10px 18px;color:#0A1628;font-size:13px;font-weight:800;cursor:pointer;">📲 Install</button>
+  <button onclick="doInstall()" style="background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:10px;padding:9px 16px;color:#0A1628;font-size:13px;font-weight:800;cursor:pointer;">📲 Install</button>
   <button onclick="document.getElementById('installBanner').style.display='none'" style="background:none;border:none;color:#555;font-size:20px;cursor:pointer;">✕</button>
 </div>
 
-<!-- Login Screen -->
+<!-- SHARE MODAL -->
+<div id="shareModal">
+  <div id="shareModalBox">
+    <div style="font-size:16px;font-weight:800;color:#FFD700;margin-bottom:14px;">🔗 Share App</div>
+    <div style="background:#0A1628;border:1px solid #1E3A5F;border-radius:10px;padding:12px;font-size:12px;color:#aaa;word-break:break-all;margin-bottom:12px;" id="shareUrlText"></div>
+    <div style="display:flex;gap:8px;flex-direction:column;">
+      <button onclick="copyShareLink()" style="background:#1A2F4A;border:1px solid #1E3A5F;border-radius:10px;padding:12px;color:#F0F0F0;font-size:14px;cursor:pointer;">📋 Copy Link</button>
+      <button onclick="shareWhatsApp()" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:10px;padding:12px;color:#25D366;font-size:14px;cursor:pointer;">💬 Share via WhatsApp</button>
+      <button onclick="document.getElementById('shareModal').style.display='none'" style="background:#1A2F4A;border:none;border-radius:10px;padding:11px;color:#888;font-size:14px;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
 <div id="loginScreen">
-  <div style="width:80px;height:80px;background:linear-gradient(135deg,#1A2F4A,#0F1E35);border-radius:20px;border:2px solid #FFD700;display:flex;align-items:center;justify-content:center;font-size:40px;">💡</div>
+  <div style="width:72px;height:72px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 4px 20px rgba(255,215,0,0.4);">💡</div>
   <h2>Payel Shop</h2>
-  <p>Lights & Accessories</p>
+  <p>Lights &amp; Accessories</p>
   <input type="email" class="login-input" id="loginEmail" placeholder="Email (optional)" autocomplete="email"/>
   <div style="position:relative;width:100%;max-width:300px;">
     <input type="password" class="login-input" id="passInput" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()" style="padding-right:48px;"/>
-    <button onclick="toggleEye()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:18px;cursor:pointer;" id="eyeBtn">👁️</button>
+    <button onclick="toggleEye('passInput','eyeLogin')" id="eyeLogin" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:18px;cursor:pointer;">👁️</button>
   </div>
   <div id="loginError">❌ Wrong Password!</div>
   <button class="login-btn" onclick="tryLogin()">🔐 Login</button>
   <button class="view-btn" onclick="viewOnly()">👁 View Only</button>
   <div id="loginInstallBtn" style="display:none;width:100%;max-width:300px;">
-    <button onclick="doInstall()" style="width:100%;background:rgba(255,215,0,0.1);border:1px solid #FFD700;border-radius:14px;padding:13px;color:#FFD700;font-size:14px;font-weight:700;cursor:pointer;">📲 Install App</button>
+    <button onclick="doInstall()" style="width:100%;background:rgba(255,215,0,0.1);border:1px solid #FFD700;border-radius:14px;padding:13px;color:#FFD700;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">📲 Install App</button>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBji9ny612NL9KLvLvnA-Uc8OsKZOklBxI",
@@ -146,92 +201,119 @@ const firebaseConfig = {
   projectId: "payel-shop",
   storageBucket: "payel-shop.firebasestorage.app",
   messagingSenderId: "858295307749",
-  appId: "1:858295307749:web:aac929ac2e84314b72330c",
-  measurementId: "G-P3RTRJDP71"
+  appId: "1:858295307749:web:aac929ac2e84314b72330c"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── State ──
+// ── STATE ──
 let isEditor = sessionStorage.getItem("shopAuth") === "editor";
 let isViewer = sessionStorage.getItem("shopAuth") === "viewer";
 let PASS = "payel123";
 let currentTab = "products";
-let products = [], sales = [], dues = [];
+let products = [], sales = [], dues = [], purchases = [], categories = [];
 let selectedYear = new Date().getFullYear();
 let selectedMonthNum = new Date().getMonth() + 1;
+let selectedDay = null;
 let addProductOpen = false, editProduct = null, addSaleOpen = false;
+let addPurchaseOpen = false, editPurchase = null;
 let deferredInstall = null;
+let lightMode = localStorage.getItem("shopTheme") === "light";
+let purchaseExpanded = {};
+let purchaseFilter = "all";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const CATEGORIES = ["LED Strip","Bulb","Ceiling Light","Wall Light","Spotlight","Chandelier","Outdoor Light","Switch & Socket","Cable & Wire","Accessories","Other"];
+const DEFAULT_CATS = ["LED Strip","Bulb","Ceiling Light","Wall Light","Spotlight","Chandelier","Outdoor Light","Switch & Socket","Cable & Wire","Accessories","Other"];
 const CAT_ICONS = {"LED Strip":"💡","Bulb":"💡","Ceiling Light":"🔆","Wall Light":"🕯️","Spotlight":"🔦","Chandelier":"✨","Outdoor Light":"🌟","Switch & Socket":"🔌","Cable & Wire":"🔋","Accessories":"🛒","Other":"📦"};
 
-// ── PWA Install ──
+if (lightMode) document.body.classList.add("light");
+
+// ── PWA ──
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstall = e;
+  e.preventDefault(); deferredInstall = e;
   document.getElementById('installBanner').style.display = 'flex';
   document.getElementById('loginInstallBtn').style.display = 'block';
+  const hb = document.getElementById('headerInstallBtn');
+  if (hb) hb.style.display = 'block';
 });
 window.doInstall = function() {
-  if (deferredInstall) {
-    deferredInstall.prompt();
-    deferredInstall.userChoice.then(() => {
-      deferredInstall = null;
-      document.getElementById('installBanner').style.display = 'none';
-    });
-  }
+  if (deferredInstall) { deferredInstall.prompt(); deferredInstall.userChoice.then(() => { deferredInstall = null; document.getElementById('installBanner').style.display = 'none'; }); }
 };
 
-// ── Firebase ──
+// ── FIREBASE LISTENERS ──
 db.ref("shop_settings/password").on("value", snap => { const v = snap.val(); if (v) PASS = v; });
+db.ref("shop_categories").on("value", snap => {
+  categories = snap.val() ? Object.values(snap.val()) : [];
+  if (categories.length === 0) {
+    // init default categories
+    DEFAULT_CATS.forEach(c => { const id = Date.now().toString() + Math.random().toString(36).slice(2,6); db.ref("shop_categories/" + id).set({ id, name: c }); });
+  }
+  renderAll();
+});
 db.ref("shop_products").on("value", snap => { products = snap.val() ? Object.values(snap.val()) : []; renderAll(); });
 db.ref("shop_sales").on("value", snap => { sales = snap.val() ? Object.values(snap.val()) : []; renderAll(); });
 db.ref("shop_dues").on("value", snap => { dues = snap.val() ? Object.values(snap.val()) : []; renderAll(); });
+db.ref("shop_purchases").on("value", snap => { purchases = snap.val() ? Object.values(snap.val()) : []; renderAll(); });
 
 if (isEditor || isViewer) document.getElementById("loginScreen").style.display = "none";
 
+// ── AUTH ──
 function tryLogin() {
   const v = document.getElementById("passInput").value;
   if (v === PASS) {
-    isEditor = true;
-    sessionStorage.setItem("shopAuth","editor");
+    isEditor = true; sessionStorage.setItem("shopAuth","editor");
     document.getElementById("loginScreen").style.display = "none";
     renderAll();
-  } else {
-    document.getElementById("loginError").style.display = "block";
-  }
+  } else { document.getElementById("loginError").style.display = "block"; }
 }
 function viewOnly() {
-  isViewer = true;
-  sessionStorage.setItem("shopAuth","viewer");
+  isViewer = true; sessionStorage.setItem("shopAuth","viewer");
   document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("viewOnlyBadge").style.display = "block";
   renderAll();
 }
 function logout() {
-  sessionStorage.removeItem("shopAuth");
-  isEditor = false; isViewer = false;
+  sessionStorage.removeItem("shopAuth"); isEditor = false; isViewer = false;
   document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("viewOnlyBadge").style.display = "none";
   document.getElementById("passInput").value = "";
   document.getElementById("loginError").style.display = "none";
 }
 function checkEditor() { if (!isEditor) { showErr("View only mode!"); return false; } return true; }
-function toggleEye() {
-  const el = document.getElementById("passInput");
+function toggleEye(inputId) {
+  const el = document.getElementById(inputId);
   el.type = el.type === "password" ? "text" : "password";
 }
 function showNotif(msg) {
-  const el = document.getElementById("notif");
-  el.textContent = msg; el.style.display = "block";
+  const el = document.getElementById("notif"); el.textContent = msg; el.style.display = "block";
   setTimeout(() => el.style.display = "none", 2500);
 }
 function showErr(msg) {
-  const el = document.getElementById("notifErr");
-  el.textContent = "❌ " + msg; el.style.display = "block";
+  const el = document.getElementById("notifErr"); el.textContent = "❌ " + msg; el.style.display = "block";
   setTimeout(() => el.style.display = "none", 2500);
 }
 function getSelectedMonth() { return selectedYear + "-" + String(selectedMonthNum).padStart(2,"0"); }
+
+// ── THEME ──
+function toggleTheme() {
+  lightMode = !lightMode;
+  document.body.classList.toggle("light", lightMode);
+  localStorage.setItem("shopTheme", lightMode ? "light" : "dark");
+  const btn = document.getElementById("themeBtn");
+  if (btn) btn.textContent = lightMode ? "🌙" : "☀️";
+}
+
+// ── SHARE ──
+function openShare() {
+  document.getElementById("shareUrlText").textContent = window.location.href;
+  document.getElementById("shareModal").style.display = "flex";
+}
+function copyShareLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => { showNotif("✅ Link copied!"); document.getElementById("shareModal").style.display = "none"; });
+}
+function shareWhatsApp() {
+  window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent("💡 Payel Shop App:\n" + window.location.href), "_blank");
+}
 
 // ── TABS ──
 function setTab(t) {
@@ -244,14 +326,88 @@ function setTab(t) {
   renderAll();
 }
 
-// ── PRODUCT CRUD ──
+// ── CALENDAR ──
+function renderCalendar() {
+  const bar = document.getElementById("calBar");
+  if (!bar) return;
+  const today = new Date();
+  const year = selectedYear, month = selectedMonthNum - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayNames = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  // sales days set
+  const saleDays = new Set(sales.filter(s => s.monthKey === getSelectedMonth()).map(s => parseInt(s.date?.slice(8,10))));
+  let html = "";
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dt = new Date(year, month, d);
+    const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
+    const isSel = selectedDay === d;
+    const hasSale = saleDays.has(d);
+    html += '<div class="cal-day' + (isToday?" today":"") + (isSel?" selected":"") + '" onclick="selectDay(' + d + ')">' +
+      '<div class="cd-day">' + dayNames[dt.getDay()] + '</div>' +
+      '<div class="cd-num">' + d + '</div>' +
+      '<div class="cd-dot" style="' + (hasSale?"display:block":"") + '"></div>' +
+      '</div>';
+  }
+  bar.innerHTML = html;
+  // scroll to today or selected
+  const target = selectedDay || today.getDate();
+  setTimeout(() => { const el = bar.children[target-1]; if(el) el.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}); }, 100);
+}
+function selectDay(d) {
+  selectedDay = selectedDay === d ? null : d;
+  renderAll();
+}
+
+// ── CATEGORIES CRUD ──
+function getCatNames() { return categories.map(c => c.name); }
+function openCatManager() {
+  if (!checkEditor()) return;
+  document.getElementById("catModal").style.display = "flex";
+  renderCatList();
+}
+function closeCatModal() { document.getElementById("catModal").style.display = "none"; }
+function renderCatList() {
+  const el = document.getElementById("catList");
+  if (!el) return;
+  el.innerHTML = categories.map(c =>
+    '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1E3A5F;">' +
+    '<span style="flex:1;font-size:14px;">' + (CAT_ICONS[c.name]||"📦") + ' ' + c.name + '</span>' +
+    '<button onclick="editCat(\'' + c.id + '\',\'' + c.name + '\')" style="background:#1A2F4A;border:none;border-radius:6px;padding:5px 10px;color:#888;cursor:pointer;font-size:13px;">✏️</button>' +
+    '<button onclick="deleteCat(\'' + c.id + '\')" style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:6px;padding:5px 10px;color:#E74C3C;cursor:pointer;font-size:13px;">🗑️</button>' +
+    '</div>'
+  ).join("") +
+  '<div style="margin-top:12px;display:flex;gap:8px;">' +
+  '<input type="text" id="newCatInput" placeholder="New category name..." style="flex:1;background:#0A1628;border:1px solid #1E3A5F;border-radius:10px;padding:10px;color:#F0F0F0;font-size:14px;outline:none;"/>' +
+  '<button onclick="addCat()" style="background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:10px;padding:10px 14px;color:#0A1628;font-weight:700;cursor:pointer;">+ Add</button>' +
+  '</div>';
+}
+function addCat() {
+  const val = document.getElementById("newCatInput")?.value.trim();
+  if (!val) return;
+  const id = Date.now().toString();
+  db.ref("shop_categories/" + id).set({ id, name: val });
+  document.getElementById("newCatInput").value = "";
+  showNotif("✅ Category added!");
+}
+function editCat(id, oldName) {
+  const newName = prompt("Edit category name:", oldName);
+  if (!newName || !newName.trim()) return;
+  db.ref("shop_categories/" + id + "/name").set(newName.trim());
+  showNotif("✅ Updated!");
+}
+function deleteCat(id) {
+  if (!confirm("Delete this category?")) return;
+  db.ref("shop_categories/" + id).remove();
+}
+
+// ── PRODUCTS ──
 function openAddProduct() {
   if (!checkEditor()) return;
-  addProductOpen = true;
-  renderAll();
+  addProductOpen = true; renderAll();
   setTimeout(() => {
     document.getElementById("pName").value = "";
-    document.getElementById("pCategory").value = "LED Strip";
+    const pCat = document.getElementById("pCategory");
+    if (pCat && getCatNames().length) pCat.value = getCatNames()[0];
     document.getElementById("pBuyPrice").value = "";
     document.getElementById("pSellPrice").value = "";
     document.getElementById("pStock").value = "";
@@ -262,7 +418,6 @@ function openAddProduct() {
   }, 50);
 }
 function closeProductModal() { addProductOpen = false; editProduct = null; renderAll(); }
-
 function doAddProduct() {
   const name = document.getElementById("pName").value.trim();
   const category = document.getElementById("pCategory").value;
@@ -276,19 +431,16 @@ function doAddProduct() {
   if (sellPrice <= 0) { showErr("Selling price required!"); return; }
   const id = Date.now().toString();
   db.ref("shop_products/" + id).set({ id, name, category, buyPrice, sellPrice, stock, unit, barcode, notes, createdAt: new Date().toISOString() });
-  addProductOpen = false;
-  showNotif("✅ " + name + " added!");
-  renderAll();
+  addProductOpen = false; showNotif("✅ " + name + " added!"); renderAll();
 }
-
 function openEditProduct(id) {
   if (!checkEditor()) return;
-  editProduct = products.find(p => p.id === id);
-  if (!editProduct) return;
+  editProduct = products.find(p => p.id === id); if (!editProduct) return;
   renderAll();
   setTimeout(() => {
     document.getElementById("epName").value = editProduct.name || "";
-    document.getElementById("epCategory").value = editProduct.category || "LED Strip";
+    const epCat = document.getElementById("epCategory");
+    if (epCat) epCat.value = editProduct.category || "";
     document.getElementById("epBuyPrice").value = editProduct.buyPrice || "";
     document.getElementById("epSellPrice").value = editProduct.sellPrice || "";
     document.getElementById("epStock").value = editProduct.stock || 0;
@@ -298,7 +450,6 @@ function openEditProduct(id) {
     updateEditProductCalc();
   }, 50);
 }
-
 function doEditProduct() {
   const name = document.getElementById("epName").value.trim();
   const category = document.getElementById("epCategory").value;
@@ -310,94 +461,39 @@ function doEditProduct() {
   const notes = document.getElementById("epNotes").value.trim();
   if (!name) { showErr("Name required!"); return; }
   db.ref("shop_products/" + editProduct.id).set({ ...editProduct, name, category, buyPrice, sellPrice, stock, unit, barcode, notes });
-  editProduct = null;
-  showNotif("✅ Product updated!");
-  renderAll();
+  editProduct = null; showNotif("✅ Updated!"); renderAll();
 }
-
 function deleteProduct(id) {
   if (!confirm("Delete this product?")) return;
-  db.ref("shop_products/" + id).remove();
-  showNotif("🗑️ Deleted");
+  db.ref("shop_products/" + id).remove(); showNotif("🗑️ Deleted");
 }
-
 function updateProductCalc() {
   const buy = parseFloat(document.getElementById("pBuyPrice")?.value) || 0;
   const sell = parseFloat(document.getElementById("pSellPrice")?.value) || 0;
-  const profit = sell - buy;
-  const margin = sell > 0 ? ((profit / sell) * 100).toFixed(1) : 0;
+  const profit = sell - buy; const margin = sell > 0 ? ((profit/sell)*100).toFixed(1) : 0;
   const el = document.getElementById("productCalcBox");
-  if (el) el.innerHTML = '<div class="calc-row"><span class="lbl">Buy Price</span><span class="val">AED ' + buy.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Sell Price</span><span class="val">AED ' + sell.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Profit/Unit</span><span class="val ' + (profit >= 0 ? 'green' : 'red') + '">' + (profit >= 0 ? '+' : '') + 'AED ' + profit.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Margin</span><span class="val gold">' + margin + '%</span></div>';
+  if (el) el.innerHTML = '<div class="calc-row"><span class="calc-lbl">Buy Price</span><span>AED ' + buy.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Sell Price</span><span>AED ' + sell.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Profit/Unit</span><span class="' + (profit>=0?"green":"red") + '">' + (profit>=0?"+":"") + 'AED ' + profit.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Margin</span><span class="gold">' + margin + '%</span></div>';
 }
 function updateEditProductCalc() {
   const buy = parseFloat(document.getElementById("epBuyPrice")?.value) || 0;
   const sell = parseFloat(document.getElementById("epSellPrice")?.value) || 0;
-  const profit = sell - buy;
-  const margin = sell > 0 ? ((profit / sell) * 100).toFixed(1) : 0;
+  const profit = sell - buy; const margin = sell > 0 ? ((profit/sell)*100).toFixed(1) : 0;
   const el = document.getElementById("editProductCalcBox");
-  if (el) el.innerHTML = '<div class="calc-row"><span class="lbl">Buy Price</span><span class="val">AED ' + buy.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Sell Price</span><span class="val">AED ' + sell.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Profit/Unit</span><span class="val ' + (profit >= 0 ? 'green' : 'red') + '">' + (profit >= 0 ? '+' : '') + 'AED ' + profit.toFixed(2) + '</span></div><div class="calc-row"><span class="lbl">Margin</span><span class="val gold">' + margin + '%</span></div>';
+  if (el) el.innerHTML = '<div class="calc-row"><span class="calc-lbl">Buy Price</span><span>AED ' + buy.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Sell Price</span><span>AED ' + sell.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Profit/Unit</span><span class="' + (profit>=0?"green":"red") + '">' + (profit>=0?"+":"") + 'AED ' + profit.toFixed(2) + '</span></div><div class="calc-row"><span class="calc-lbl">Margin</span><span class="gold">' + margin + '%</span></div>';
 }
 function adjustStock(id, delta) {
   if (!checkEditor()) return;
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  const newStock = Math.max(0, (p.stock || 0) + delta);
-  db.ref("shop_products/" + id + "/stock").set(newStock);
-}
-
-// ── BARCODE SCAN ──
-let scanStream = null;
-let scanTarget = null; // 'add' or 'edit'
-
-function openScanner(target) {
-  scanTarget = target;
-  const modal = document.getElementById("scanModal");
-  modal.style.display = "flex";
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
-    scanStream = stream;
-    const video = document.getElementById("scanVideo");
-    video.srcObject = stream;
-    video.play();
-    scanFrames(video);
-  }).catch(() => { showErr("Camera access denied!"); closeScanner(); });
-}
-
-function closeScanner() {
-  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
-  document.getElementById("scanModal").style.display = "none";
-}
-
-function scanFrames(video) {
-  if (!scanStream) return;
-  if ('BarcodeDetector' in window) {
-    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','qr_code','code_128','code_39','upc_a','upc_e'] });
-    function detect() {
-      if (!scanStream) return;
-      detector.detect(video).then(barcodes => {
-        if (barcodes.length > 0) {
-          const code = barcodes[0].rawValue;
-          const fieldId = scanTarget === 'edit' ? 'epBarcode' : 'pBarcode';
-          const el = document.getElementById(fieldId);
-          if (el) el.value = code;
-          showNotif("✅ Scanned: " + code);
-          closeScanner();
-        } else { requestAnimationFrame(detect); }
-      }).catch(() => requestAnimationFrame(detect));
-    }
-    requestAnimationFrame(detect);
-  } else {
-    showErr("Barcode scanner not supported on this browser");
-    closeScanner();
-  }
+  const p = products.find(x => x.id === id); if (!p) return;
+  db.ref("shop_products/" + id + "/stock").set(Math.max(0, (p.stock||0) + delta));
 }
 
 // ── SALES ──
 function openAddSale(pid) {
   if (!checkEditor()) return;
-  addSaleOpen = true;
-  renderAll();
+  addSaleOpen = true; renderAll();
   setTimeout(() => {
-    document.getElementById("sDate").value = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("sDate").value = selectedDay ? selectedYear + "-" + String(selectedMonthNum).padStart(2,"0") + "-" + String(selectedDay).padStart(2,"0") : today;
     document.getElementById("sQty").value = "1";
     document.getElementById("sDiscount").value = "0";
     document.getElementById("sPayment").value = "cash";
@@ -406,39 +502,34 @@ function openAddSale(pid) {
     const sel = document.getElementById("sProduct");
     if (sel) {
       sel.innerHTML = '<option value="">-- Select Product --</option>' +
-        products.filter(p => (p.stock||0) > 0).map(p => '<option value="' + p.id + '">' + p.name + ' (' + (p.stock||0) + ' ' + (p.unit||'pcs') + ') — AED ' + p.sellPrice + '</option>').join('') +
-        '<optgroup label="Out of Stock">' +
-        products.filter(p => (p.stock||0) <= 0).map(p => '<option value="' + p.id + '" style="color:#888;">' + p.name + ' — Out of Stock</option>').join('') +
-        '</optgroup>';
+        products.filter(p=>(p.stock||0)>0).map(p=>'<option value="'+p.id+'">'+p.name+' ('+p.stock+' '+(p.unit||'pcs')+') — AED '+p.sellPrice+'</option>').join('') +
+        (products.filter(p=>(p.stock||0)<=0).length?'<optgroup label="Out of Stock">'+products.filter(p=>(p.stock||0)<=0).map(p=>'<option value="'+p.id+'">'+p.name+' — Out</option>').join('')+'</optgroup>':'');
       if (pid) sel.value = pid;
     }
     updateSaleCalc();
   }, 50);
 }
 function closeSaleModal() { addSaleOpen = false; renderAll(); }
-
 function updateSaleCalc() {
   const pid = document.getElementById("sProduct")?.value;
   const qty = parseInt(document.getElementById("sQty")?.value) || 1;
   const discount = parseFloat(document.getElementById("sDiscount")?.value) || 0;
   const product = products.find(p => p.id === pid);
-  const el = document.getElementById("saleCalcBox");
-  if (!el) return;
+  const el = document.getElementById("saleCalcBox"); if (!el) return;
   if (!product) { el.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;">Select a product</div>'; return; }
   const subtotal = product.sellPrice * qty;
   const total = Math.max(0, subtotal - discount);
-  const cost = (product.buyPrice || 0) * qty;
+  const cost = (product.buyPrice||0) * qty;
   const profit = total - cost;
-  const stockLeft = (product.stock || 0) - qty;
-  el.innerHTML = '<div class="calc-row"><span class="lbl">Unit Price</span><span class="val">AED ' + product.sellPrice.toFixed(2) + '</span></div>' +
-    '<div class="calc-row"><span class="lbl">Qty × ' + qty + '</span><span class="val">AED ' + subtotal.toFixed(2) + '</span></div>' +
-    '<div class="calc-row"><span class="lbl">Discount</span><span class="val red">- AED ' + discount.toFixed(2) + '</span></div>' +
-    '<div style="border-top:1px solid #1E3A5F;margin:6px 0;"></div>' +
-    '<div class="calc-row"><span class="lbl" style="color:#FFD700;font-weight:700;">Total</span><span class="val gold">AED ' + total.toFixed(2) + '</span></div>' +
-    '<div class="calc-row"><span class="lbl">Profit</span><span class="val ' + (profit >= 0 ? 'green' : 'red') + '">' + (profit >= 0 ? '+' : '') + 'AED ' + profit.toFixed(2) + '</span></div>' +
-    '<div class="calc-row"><span class="lbl">Stock Left</span><span class="val ' + (stockLeft < 0 ? 'red' : '') + '">' + (stockLeft < 0 ? '⚠️ Insufficient' : stockLeft + ' ' + (product.unit||'pcs')) + '</span></div>';
+  const stockLeft = (product.stock||0) - qty;
+  el.innerHTML = '<div class="calc-row"><span class="calc-lbl">Unit Price</span><span>AED ' + product.sellPrice.toFixed(2) + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl">Qty ×' + qty + '</span><span>AED ' + subtotal.toFixed(2) + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl">Discount</span><span class="red">-AED ' + discount.toFixed(2) + '</span></div>' +
+    '<div style="border-top:1px solid #1E3A5F;margin:5px 0;"></div>' +
+    '<div class="calc-row"><span class="calc-lbl gold" style="font-weight:700;">Total</span><span class="gold">AED ' + total.toFixed(2) + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl">Profit</span><span class="' + (profit>=0?"green":"red") + '">' + (profit>=0?"+":"") + 'AED ' + profit.toFixed(2) + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl">Stock Left</span><span class="' + (stockLeft<0?"red":"") + '">' + (stockLeft<0?"⚠️ Insufficient":stockLeft+" "+(product.unit||"pcs")) + '</span></div>';
 }
-
 function doAddSale() {
   const pid = document.getElementById("sProduct").value;
   const qty = parseInt(document.getElementById("sQty").value) || 1;
@@ -451,38 +542,99 @@ function doAddSale() {
   if (!product) { showErr("Select a product!"); return; }
   const subtotal = product.sellPrice * qty;
   const total = Math.max(0, subtotal - discount);
-  const cost = (product.buyPrice || 0) * qty;
+  const cost = (product.buyPrice||0) * qty;
   const profit = total - cost;
-  const monthKey = dateVal.slice(0, 7);
+  const monthKey = dateVal.slice(0,7);
   const id = Date.now().toString();
   db.ref("shop_sales/" + id).set({ id, productId: product.id, productName: product.name, category: product.category, qty, unitPrice: product.sellPrice, discount, total, cost, profit, payment, customer, notes, date: dateVal, monthKey });
-  db.ref("shop_products/" + product.id + "/stock").set(Math.max(0, (product.stock || 0) - qty));
+  db.ref("shop_products/" + product.id + "/stock").set(Math.max(0, (product.stock||0) - qty));
   if (payment === "due") {
     const dueId = Date.now().toString() + "d";
-    db.ref("shop_dues/" + dueId).set({ id: dueId, saleId: id, customer: customer || "Unknown", amount: total, paid: 0, date: dateVal, monthKey, status: "pending", notes });
+    db.ref("shop_dues/" + dueId).set({ id: dueId, saleId: id, customer: customer||"Unknown", amount: total, paid: 0, date: dateVal, monthKey, status: "pending", notes });
   }
-  addSaleOpen = false;
-  showNotif("✅ Sale saved! AED " + total.toFixed(2));
-  renderAll();
+  addSaleOpen = false; showNotif("✅ Sale saved! AED " + total.toFixed(2)); renderAll();
 }
-function deleteSale(id) {
-  if (!confirm("Delete?")) return;
-  db.ref("shop_sales/" + id).remove();
+function deleteSale(id) { if (!confirm("Delete?")) return; db.ref("shop_sales/" + id).remove(); }
+
+// ── PURCHASES ──
+function openAddPurchase() {
+  if (!checkEditor()) return;
+  addPurchaseOpen = true; editPurchase = null; renderAll();
+  setTimeout(() => {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("purDate").value = selectedDay ? selectedYear + "-" + String(selectedMonthNum).padStart(2,"0") + "-" + String(selectedDay).padStart(2,"0") : today;
+    document.getElementById("purSupplier").value = "";
+    document.getElementById("purProduct").value = "";
+    document.getElementById("purQty").value = "";
+    document.getElementById("purCost").value = "";
+    document.getElementById("purNotes").value = "";
+    updatePurCalc();
+  }, 50);
+}
+function openEditPurchase(id) {
+  if (!checkEditor()) return;
+  const p = purchases.find(x => x.id === id); if (!p) return;
+  editPurchase = p; addPurchaseOpen = true; renderAll();
+  setTimeout(() => {
+    document.getElementById("purDate").value = p.date || "";
+    document.getElementById("purSupplier").value = p.supplier || "";
+    document.getElementById("purProduct").value = p.productName || "";
+    document.getElementById("purQty").value = p.qty || "";
+    document.getElementById("purCost").value = p.cost || "";
+    document.getElementById("purNotes").value = p.notes || "";
+    updatePurCalc();
+  }, 50);
+}
+function closePurchaseModal() { addPurchaseOpen = false; editPurchase = null; renderAll(); }
+function updatePurCalc() {
+  const qty = parseInt(document.getElementById("purQty")?.value) || 0;
+  const cost = parseFloat(document.getElementById("purCost")?.value) || 0;
+  const total = qty * cost;
+  const el = document.getElementById("purCalcBox"); if (!el) return;
+  el.innerHTML = '<div class="calc-row"><span class="calc-lbl">Qty</span><span>' + qty + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl">Cost/Unit</span><span>AED ' + cost.toFixed(2) + '</span></div>' +
+    '<div class="calc-row"><span class="calc-lbl gold" style="font-weight:700;">Total Cost</span><span class="gold">AED ' + total.toFixed(2) + '</span></div>';
+}
+function doSavePurchase() {
+  const date = document.getElementById("purDate").value;
+  const supplier = document.getElementById("purSupplier").value.trim();
+  const productName = document.getElementById("purProduct").value.trim();
+  const qty = parseInt(document.getElementById("purQty").value) || 0;
+  const cost = parseFloat(document.getElementById("purCost").value) || 0;
+  const notes = document.getElementById("purNotes").value.trim();
+  if (!date || !productName || qty <= 0) { showErr("Date, product & qty required!"); return; }
+  const total = qty * cost;
+  const monthKey = date.slice(0,7);
+  if (editPurchase) {
+    db.ref("shop_purchases/" + editPurchase.id).set({ ...editPurchase, date, supplier, productName, qty, cost, total, notes, monthKey });
+    showNotif("✅ Purchase updated!");
+  } else {
+    const id = Date.now().toString();
+    db.ref("shop_purchases/" + id).set({ id, date, supplier, productName, qty, cost, total, notes, monthKey, createdAt: new Date().toISOString() });
+    showNotif("✅ Purchase saved! AED " + total.toFixed(2));
+  }
+  addPurchaseOpen = false; editPurchase = null; renderAll();
+}
+function deletePurchase(id) {
+  if (!confirm("Delete this purchase?")) return;
+  db.ref("shop_purchases/" + id).remove(); showNotif("🗑️ Deleted");
+}
+function togglePurchaseDate(date) {
+  purchaseExpanded[date] = !purchaseExpanded[date]; renderAll();
+}
+function setPurchaseFilter(f) {
+  purchaseFilter = f; renderAll();
 }
 
 // ── DUES ──
 function markDuePaid(id) {
   if (!checkEditor()) return;
-  const due = dues.find(d => d.id === id);
-  if (!due) return;
+  const due = dues.find(d => d.id === id); if (!due) return;
   db.ref("shop_dues/" + id + "/status").set("paid");
   db.ref("shop_dues/" + id + "/paid").set(due.amount);
   showNotif("✅ Marked Paid!");
 }
-function deleteDue(id) {
-  if (!confirm("Delete?")) return;
-  db.ref("shop_dues/" + id).remove();
-}
+function deleteDue(id) { if (!confirm("Delete?")) return; db.ref("shop_dues/" + id).remove(); }
 
 // ── PASSWORD ──
 function openChangePass() {
@@ -498,56 +650,86 @@ function doChangePass() {
   const old = document.getElementById("cpOld").value;
   const n = document.getElementById("cpNew").value;
   const c = document.getElementById("cpConfirm").value;
-  if (old !== PASS) { document.getElementById("cpError").textContent = "Current password wrong!"; document.getElementById("cpError").style.display = "block"; return; }
-  if (n.length < 4) { document.getElementById("cpError").textContent = "Min 4 characters!"; document.getElementById("cpError").style.display = "block"; return; }
-  if (n !== c) { document.getElementById("cpError").textContent = "Passwords don't match!"; document.getElementById("cpError").style.display = "block"; return; }
-  db.ref("shop_settings/password").set(n);
-  PASS = n;
-  closeChangePass();
-  showNotif("✅ Password changed!");
+  const errEl = document.getElementById("cpError");
+  if (old !== PASS) { errEl.textContent = "Current password wrong!"; errEl.style.display = "block"; return; }
+  if (n.length < 4) { errEl.textContent = "Min 4 characters!"; errEl.style.display = "block"; return; }
+  if (n !== c) { errEl.textContent = "Passwords don't match!"; errEl.style.display = "block"; return; }
+  db.ref("shop_settings/password").set(n); PASS = n;
+  closeChangePass(); showNotif("✅ Password changed!");
 }
 
 // ── BACKUP / RESTORE / CSV ──
 function backupData() {
-  const data = { version: 1, exportedAt: new Date().toISOString(), products, sales, dues };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const data = { version: 1, exportedAt: new Date().toISOString(), products, sales, dues, purchases, categories };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "payel-shop-backup-" + new Date().toISOString().slice(0,10) + ".json"; a.click();
-  URL.revokeObjectURL(url);
-  showNotif("💾 Backup downloaded!");
+  const a = document.createElement("a"); a.href=url; a.download="payel-shop-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+  URL.revokeObjectURL(url); showNotif("💾 Backup downloaded!");
 }
-function restoreData() { document.getElementById("restoreInput").value = ""; document.getElementById("restoreInput").click(); }
+function restoreData() { document.getElementById("restoreInput").value=""; document.getElementById("restoreInput").click(); }
 function handleRestore(input) {
-  const file = input.files[0]; if (!file) return;
+  const file = input.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.products || !data.sales) { showErr("Invalid backup!"); return; }
-      if (!confirm("Replace ALL data?")) return;
-      const pObj = {}; data.products.forEach(p => { pObj[p.id] = p; });
-      const sObj = {}; data.sales.forEach(s => { sObj[s.id] = s; });
-      db.ref("shop_products").set(Object.keys(pObj).length ? pObj : null);
-      db.ref("shop_sales").set(Object.keys(sObj).length ? sObj : null);
-      if (data.dues) { const dObj = {}; data.dues.forEach(d => { dObj[d.id] = d; }); db.ref("shop_dues").set(Object.keys(dObj).length ? dObj : null); }
+      if(!data.products||!data.sales) { showErr("Invalid backup!"); return; }
+      if(!confirm("Replace ALL data?")) return;
+      const pObj={};data.products.forEach(p=>{pObj[p.id]=p;});
+      const sObj={};data.sales.forEach(s=>{sObj[s.id]=s;});
+      db.ref("shop_products").set(Object.keys(pObj).length?pObj:null);
+      db.ref("shop_sales").set(Object.keys(sObj).length?sObj:null);
+      if(data.dues){const dObj={};data.dues.forEach(d=>{dObj[d.id]=d;});db.ref("shop_dues").set(Object.keys(dObj).length?dObj:null);}
+      if(data.purchases){const puObj={};data.purchases.forEach(p=>{puObj[p.id]=p;});db.ref("shop_purchases").set(Object.keys(puObj).length?puObj:null);}
+      if(data.categories){const cObj={};data.categories.forEach(c=>{cObj[c.id]=c;});db.ref("shop_categories").set(Object.keys(cObj).length?cObj:null);}
       showNotif("✅ Restore successful!");
-    } catch(e) { showErr("Could not read file!"); }
+    } catch(e){showErr("Could not read file!");}
   };
   reader.readAsText(file);
 }
 function exportCSV() {
-  const monthSales = sales.filter(s => s.monthKey === getSelectedMonth());
-  if (!monthSales.length) { showErr("No sales this month!"); return; }
-  const rows = [["Date","Product","Category","Qty","Unit Price","Discount","Total","Cost","Profit","Payment","Customer","Notes"]];
-  monthSales.forEach(s => rows.push([s.date, s.productName, s.category||"", s.qty, s.unitPrice, s.discount||0, s.total, s.cost||0, s.profit||0, s.payment, s.customer||"", s.notes||""]));
-  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "sales-" + getSelectedMonth() + ".csv"; a.click();
-  URL.revokeObjectURL(url);
-  showNotif("📥 CSV downloaded!");
+  const ms = sales.filter(s=>s.monthKey===getSelectedMonth());
+  if(!ms.length){showErr("No sales this month!");return;}
+  const rows=[["Date","Product","Category","Qty","Unit Price","Discount","Total","Cost","Profit","Payment","Customer","Notes"]];
+  ms.forEach(s=>rows.push([s.date,s.productName,s.category||"",s.qty,s.unitPrice,s.discount||0,s.total,s.cost||0,s.profit||0,s.payment,s.customer||"",s.notes||""]));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="sales-"+getSelectedMonth()+".csv";a.click();
+  URL.revokeObjectURL(url);showNotif("📥 CSV downloaded!");
+}
+
+// ── BARCODE SCANNER ──
+let scanStream=null,scanTarget=null;
+function openScanner(target) {
+  scanTarget=target;
+  document.getElementById("scanModal").style.display="flex";
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(stream=>{
+    scanStream=stream;
+    const video=document.getElementById("scanVideo");
+    video.srcObject=stream; video.play();
+    if('BarcodeDetector' in window){
+      const detector=new BarcodeDetector({formats:['ean_13','ean_8','qr_code','code_128','code_39','upc_a','upc_e']});
+      function detect(){
+        if(!scanStream)return;
+        detector.detect(video).then(barcodes=>{
+          if(barcodes.length>0){
+            const code=barcodes[0].rawValue;
+            const fieldId=scanTarget==='edit'?'epBarcode':'pBarcode';
+            const el=document.getElementById(fieldId);
+            if(el)el.value=code;
+            showNotif("✅ Scanned: "+code);
+            closeScanner();
+          } else requestAnimationFrame(detect);
+        }).catch(()=>requestAnimationFrame(detect));
+      }
+      requestAnimationFrame(detect);
+    } else { showErr("Scanner not supported on this browser"); closeScanner(); }
+  }).catch(()=>{showErr("Camera access denied!");closeScanner();});
+}
+function closeScanner(){
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  document.getElementById("scanModal").style.display="none";
 }
 
 // ── RENDER ──
@@ -555,390 +737,429 @@ function renderAll() {
   if (!isEditor && !isViewer) return;
   renderStats();
   renderDateDropdowns();
-  if (currentTab === "products") renderProducts();
-  else if (currentTab === "sales") renderSales();
-  else if (currentTab === "dues") renderDues();
-  else if (currentTab === "report") renderReport();
+  renderCalendar();
+  if (currentTab==="products") renderProducts();
+  else if (currentTab==="sales") renderSales();
+  else if (currentTab==="dues") renderDues();
+  else if (currentTab==="purchase") renderPurchases();
+  else if (currentTab==="report") renderReport();
   manageModals();
 }
 
 function renderStats() {
   const ms = sales.filter(s => s.monthKey === getSelectedMonth());
-  const rev = ms.reduce((a,s) => a+(s.total||0), 0);
-  const profit = ms.reduce((a,s) => a+(s.profit||0), 0);
-  const pendDues = dues.filter(d => d.status !== "paid").reduce((a,d) => a+(d.amount-d.paid), 0);
-  const lowStock = products.filter(p => (p.stock||0) <= 5 && (p.stock||0) > 0).length;
-  const outStock = products.filter(p => (p.stock||0) === 0).length;
-  document.getElementById("statRevenue").textContent = "AED " + rev.toFixed(0);
-  document.getElementById("statProfit").textContent = "AED " + profit.toFixed(0);
+  const rev = ms.reduce((a,s)=>a+(s.total||0),0);
+  const profit = ms.reduce((a,s)=>a+(s.profit||0),0);
+  const pendDues = dues.filter(d=>d.status!=="paid").reduce((a,d)=>a+(d.amount-d.paid),0);
+  const lowStock = products.filter(p=>(p.stock||0)<=5&&(p.stock||0)>0).length;
+  const outStock = products.filter(p=>(p.stock||0)===0).length;
+  document.getElementById("statRevenue").textContent = "AED "+rev.toFixed(0);
+  document.getElementById("statProfit").textContent = "AED "+profit.toFixed(0);
   document.getElementById("statOrders").textContent = ms.length;
-  document.getElementById("statDue").textContent = pendDues > 0 ? "AED " + pendDues.toFixed(0) : "0";
-  document.getElementById("statDue").style.color = pendDues > 0 ? "#E74C3C" : "#FFD700";
-  document.getElementById("statLowStock").textContent = lowStock + " low";
-  document.getElementById("statOutStock").textContent = outStock + " out";
+  document.getElementById("statDue").textContent = pendDues>0?"AED "+pendDues.toFixed(0):"0";
+  document.getElementById("statDue").style.color = pendDues>0?"#E74C3C":"#FFD700";
+  document.getElementById("statLowStock").textContent = lowStock+" low";
+  document.getElementById("statOutStock").textContent = outStock+" out";
 }
 
 function renderDateDropdowns() {
-  const ySel = document.getElementById("yearSelect");
-  const mSel = document.getElementById("monthSelect");
-  if (!ySel || !mSel) return;
-  if (ySel.options.length === 0) {
-    const now = new Date().getFullYear();
-    for (let y = now; y >= now-3; y--) {
-      const o = document.createElement("option"); o.value = y; o.textContent = y; ySel.appendChild(o);
-    }
-  }
-  ySel.value = selectedYear;
-  if (mSel.options.length === 0) {
-    MONTHS.forEach((m,i) => { const o = document.createElement("option"); o.value = i+1; o.textContent = m; mSel.appendChild(o); });
-  }
-  mSel.value = selectedMonthNum;
+  const ySel=document.getElementById("yearSelect");
+  const mSel=document.getElementById("monthSelect");
+  if(!ySel||!mSel) return;
+  if(ySel.options.length===0){const now=new Date().getFullYear();for(let y=now;y>=now-3;y--){const o=document.createElement("option");o.value=y;o.textContent=y;ySel.appendChild(o);}}
+  ySel.value=selectedYear;
+  if(mSel.options.length===0){MONTHS.forEach((m,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=m;mSel.appendChild(o);});}
+  mSel.value=selectedMonthNum;
 }
 
 window._filterCat = "";
 function filterCat(cat) { window._filterCat = cat; renderProducts(); }
 
+function buildCatOptions(selectedVal) {
+  const cats = getCatNames();
+  if (cats.length === 0) return DEFAULT_CATS.map(c => '<option value="'+c+'"'+(c===selectedVal?' selected':'')+'>'+c+'</option>').join('');
+  return cats.map(c => '<option value="'+c+'"'+(c===selectedVal?' selected':'')+'>'+c+'</option>').join('');
+}
+
 function renderProducts() {
-  const area = document.getElementById("mainContent");
-  if (!area) return;
-  const q = (document.getElementById("srchProd")?.value || "").toLowerCase();
+  const area = document.getElementById("mainContent"); if (!area) return;
+  const q = (document.getElementById("srchProd")?.value||"").toLowerCase();
+  const catList = getCatNames().length > 0 ? getCatNames() : DEFAULT_CATS;
   const catFiltered = products.filter(p => {
-    const matchQ = p.name.toLowerCase().includes(q) || (p.category||"").toLowerCase().includes(q);
-    const matchCat = !window._filterCat || p.category === window._filterCat;
-    return matchQ && matchCat;
+    const mQ = p.name.toLowerCase().includes(q)||(p.category||"").toLowerCase().includes(q);
+    const mC = !window._filterCat || p.category===window._filterCat;
+    return mQ && mC;
   });
 
-  let catChips = '<button onclick="filterCat(\'\')" style="flex-shrink:0;background:' + (!window._filterCat?'#FFD700':'#0F1E35') + ';border:1px solid ' + (!window._filterCat?'#FFD700':'#1E3A5F') + ';border-radius:20px;padding:4px 12px;color:' + (!window._filterCat?'#0A1628':'#888') + ';font-size:11px;font-weight:700;cursor:pointer;">All</button>';
-  CATEGORIES.forEach(c => {
-    catChips += '<button onclick="filterCat(\'' + c + '\')" style="flex-shrink:0;background:' + (window._filterCat===c?'#FFD700':'#0F1E35') + ';border:1px solid ' + (window._filterCat===c?'#FFD700':'#1E3A5F') + ';border-radius:20px;padding:4px 12px;color:' + (window._filterCat===c?'#0A1628':'#888') + ';font-size:11px;font-weight:700;cursor:pointer;">' + c + '</button>';
+  let catChips = '<button onclick="filterCat(\'\')" style="flex-shrink:0;background:'+((!window._filterCat)?'#FFD700':'#0F1E35')+';border:1px solid '+((!window._filterCat)?'#FFD700':'#1E3A5F')+';border-radius:20px;padding:4px 12px;color:'+((!window._filterCat)?'#0A1628':'#888')+';font-size:11px;font-weight:700;cursor:pointer;">All</button>';
+  catList.forEach(c => {
+    const act = window._filterCat===c;
+    catChips += '<button onclick="filterCat(\''+c+'\')" style="flex-shrink:0;background:'+(act?'#FFD700':'#0F1E35')+';border:1px solid '+(act?'#FFD700':'#1E3A5F')+';border-radius:20px;padding:4px 12px;color:'+(act?'#0A1628':'#888')+';font-size:11px;font-weight:700;cursor:pointer;">'+c+'</button>';
   });
 
-  let cards = "";
-  catFiltered.forEach(p => {
-    const stockClass = p.stock <= 0 ? "stock-zero" : p.stock <= 5 ? "stock-low" : "stock-ok";
-    const stockLabel = p.stock <= 0 ? "Out of Stock" : p.stock <= 5 ? "⚠️ " + p.stock + " " + (p.unit||'pcs') : p.stock + " " + (p.unit||'pcs');
-    const profit = (p.sellPrice||0) - (p.buyPrice||0);
-    const icon = CAT_ICONS[p.category] || "📦";
-    cards += '<div class="product-card">' +
-      '<div class="product-header">' +
-      '<div class="product-icon">' + icon + '</div>' +
-      '<div class="product-info">' +
-      '<div class="product-name">' + p.name + '</div>' +
-      '<div class="product-cat">📂 ' + (p.category||"Other") + (p.barcode ? ' · 🔖 ' + p.barcode : '') + '</div>' +
-      '<div class="product-price">AED ' + (p.sellPrice||0).toFixed(2) + (p.buyPrice ? ' · <span style="color:' + (profit>=0?'#27AE60':'#E74C3C') + '">' + (profit>=0?'+':'') + 'AED ' + profit.toFixed(2) + ' profit</span>' : '') + '</div>' +
+  let cards = catFiltered.map(p => {
+    const sc = p.stock<=0?"stock-zero":p.stock<=5?"stock-low":"stock-ok";
+    const sl = p.stock<=0?"Out of Stock":p.stock<=5?"⚠️ "+p.stock+" "+(p.unit||'pcs'):p.stock+" "+(p.unit||'pcs');
+    const profit = (p.sellPrice||0)-(p.buyPrice||0);
+    const icon = CAT_ICONS[p.category]||"📦";
+    return '<div class="product-card">' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">' +
+      '<div class="product-icon">'+icon+'</div>' +
+      '<div style="flex:1;">' +
+      '<div class="product-name">'+p.name+'</div>' +
+      '<div class="product-cat">📂 '+(p.category||"Other")+(p.barcode?' · 🔖 '+p.barcode:'')+'</div>' +
+      '<div class="product-price">AED '+(p.sellPrice||0).toFixed(2)+(p.buyPrice?' · <span style="color:'+(profit>=0?'#27AE60':'#E74C3C')+'">'+(profit>=0?'+':'')+'AED '+profit.toFixed(2)+' profit</span>':'')+'</div>' +
       '</div>' +
-      '<span class="stock-badge ' + stockClass + '">' + stockLabel + '</span>' +
+      '<span class="stock-badge '+sc+'">'+sl+'</span>' +
       '</div>' +
       '<div style="padding:0 14px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
       '<div style="display:flex;align-items:center;gap:6px;">' +
-      '<button onclick="adjustStock(\'' + p.id + '\',-1)" style="background:#1A2F4A;border:none;border-radius:8px;width:30px;height:30px;color:#F0F0F0;font-size:16px;cursor:pointer;font-weight:700;">−</button>' +
-      '<span style="font-size:14px;font-weight:700;min-width:30px;text-align:center;">' + (p.stock||0) + '</span>' +
-      '<button onclick="adjustStock(\'' + p.id + '\',1)" style="background:#1A2F4A;border:none;border-radius:8px;width:30px;height:30px;color:#F0F0F0;font-size:16px;cursor:pointer;font-weight:700;">+</button>' +
+      '<button onclick="adjustStock(\''+p.id+'\',-1)" style="background:#1A2F4A;border:none;border-radius:8px;width:28px;height:28px;color:#F0F0F0;font-size:16px;cursor:pointer;">−</button>' +
+      '<span style="font-size:14px;font-weight:700;min-width:28px;text-align:center;">'+(p.stock||0)+'</span>' +
+      '<button onclick="adjustStock(\''+p.id+'\',1)" style="background:#1A2F4A;border:none;border-radius:8px;width:28px;height:28px;color:#F0F0F0;font-size:16px;cursor:pointer;">+</button>' +
       '</div>' +
-      '<div style="display:flex;gap:6px;">' +
-      '<button onclick="openAddSale(\'' + p.id + '\')" style="background:linear-gradient(135deg,#27AE60,#1E8449);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">💸 Sell</button>' +
-      (isEditor ? '<button onclick="openEditProduct(\'' + p.id + '\')" style="background:#1A2F4A;border:none;border-radius:8px;padding:6px 10px;color:#888;font-size:14px;cursor:pointer;">✏️</button>' : '') +
-      (isEditor ? '<button onclick="deleteProduct(\'' + p.id + '\')" style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:8px;padding:6px 10px;color:#E74C3C;font-size:14px;cursor:pointer;">🗑️</button>' : '') +
+      '<div style="display:flex;gap:5px;">' +
+      '<button onclick="openAddSale(\''+p.id+'\')" style="background:linear-gradient(135deg,#27AE60,#1E8449);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">💸 Sell</button>' +
+      (isEditor?'<button onclick="openEditProduct(\''+p.id+'\')" style="background:#1A2F4A;border:none;border-radius:8px;padding:6px 8px;color:#888;font-size:13px;cursor:pointer;">✏️</button>':'') +
+      (isEditor?'<button onclick="deleteProduct(\''+p.id+'\')" style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:8px;padding:6px 8px;color:#E74C3C;font-size:13px;cursor:pointer;">🗑️</button>':'') +
       '</div></div>' +
-      (p.notes ? '<div style="padding:0 14px 10px;font-size:11px;color:#666;">📝 ' + p.notes + '</div>' : '') +
+      (p.notes?'<div style="padding:0 14px 10px;font-size:11px;color:#666;">📝 '+p.notes+'</div>':'') +
       '</div>';
-  });
+  }).join("");
 
-  area.innerHTML = '<div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">🔍</span><input class="search-input" id="srchProd" placeholder="Search products..." oninput="renderProducts()" value="' + q + '"/></div></div>' +
-    '<div style="padding:4px 12px 8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;">' + catChips + '</div>' +
-    '<div class="content-area">' + (catFiltered.length === 0 ? '<div style="text-align:center;padding:40px;color:#555;">No products found</div>' : cards) +
-    (isEditor ? '<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>' : '') + '</div>';
+  area.innerHTML = '<div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">🔍</span><input class="search-input" id="srchProd" placeholder="Search products..." oninput="renderProducts()" value="'+q+'"/></div></div>' +
+    '<div style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;">'+catChips+
+    (isEditor?'<button onclick="openCatManager()" style="flex-shrink:0;background:rgba(52,152,219,0.1);border:1px solid #3498DB;border-radius:20px;padding:4px 10px;color:#3498DB;font-size:11px;font-weight:700;cursor:pointer;">⚙️ Manage</button>':'')+'</div>' +
+    '<div class="content-area">' + (catFiltered.length===0?'<div style="text-align:center;padding:40px;color:#555;">No products found</div>':cards) +
+    (isEditor?'<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>':'') + '</div>';
 }
 
 function renderSales() {
-  const area = document.getElementById("mainContent");
-  if (!area) return;
-  const ms = sales.filter(s => s.monthKey === getSelectedMonth()).sort((a,b) => b.date.localeCompare(a.date));
-  const rev = ms.reduce((a,s) => a+(s.total||0), 0);
-  const profit = ms.reduce((a,s) => a+(s.profit||0), 0);
-  let cards = ms.map(s => '<div class="sale-card">' +
-    '<div class="sale-date">' + (s.date ? s.date.slice(5).replace("-","/") : "—") + '<br><span style="font-size:9px;color:#888;">' + (MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||"") + '</span></div>' +
-    '<div class="sale-info"><div class="sale-product">' + s.productName + '</div>' +
-    '<div class="sale-detail">' + s.qty + ' · ' + s.payment + (s.customer?' · '+s.customer:'') + '</div></div>' +
-    '<div style="text-align:right;"><div class="sale-amount">AED ' + (s.total||0).toFixed(2) + '</div>' +
-    '<div class="sale-profit">+' + (s.profit||0).toFixed(2) + ' profit</div>' +
-    (isEditor ? '<button onclick="deleteSale(\'' + s.id + '\')" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:2px;">🗑️</button>' : '') +
-    '</div></div>').join("");
-  area.innerHTML = '<div style="padding:8px 12px 4px;display:flex;gap:8px;">' +
-    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:10px;color:#888;">Revenue</div><div style="font-size:16px;font-weight:800;color:#27AE60;">AED ' + rev.toFixed(0) + '</div></div>' +
-    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:10px;color:#888;">Profit</div><div style="font-size:16px;font-weight:800;color:#3498DB;">AED ' + profit.toFixed(0) + '</div></div>' +
-    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:10px;color:#888;">Orders</div><div style="font-size:16px;font-weight:800;color:#FFD700;">' + ms.length + '</div></div></div>' +
-    '<div class="content-area">' + (ms.length === 0 ? '<div style="text-align:center;padding:40px;color:#555;">No sales this month</div>' : cards) +
-    (isEditor ? '<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>' : '') + '</div>';
+  const area = document.getElementById("mainContent"); if (!area) return;
+  let ms = sales.filter(s => s.monthKey === getSelectedMonth());
+  if (selectedDay) ms = ms.filter(s => parseInt(s.date?.slice(8,10)) === selectedDay);
+  ms = ms.sort((a,b)=>b.date.localeCompare(a.date));
+  const rev = ms.reduce((a,s)=>a+(s.total||0),0);
+  const profit = ms.reduce((a,s)=>a+(s.profit||0),0);
+  const cards = ms.map(s =>
+    '<div class="sale-card">' +
+    '<div class="sale-date-box">'+(s.date?s.date.slice(5).replace("-","/"):"—")+'<br><span style="font-size:9px;color:#888;">'+(MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||"")+'</span></div>' +
+    '<div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+s.productName+'</div>' +
+    '<div style="font-size:12px;color:#888;">'+s.qty+' · '+s.payment+(s.customer?' · '+s.customer:'')+'</div></div>' +
+    '<div style="text-align:right;"><div style="font-size:14px;font-weight:800;color:#27AE60;">AED '+(s.total||0).toFixed(2)+'</div>' +
+    '<div style="font-size:11px;color:#3498DB;">+'+(s.profit||0).toFixed(2)+' profit</div>' +
+    (isEditor?'<button onclick="deleteSale(\''+s.id+'\')" style="background:none;border:none;color:#555;font-size:11px;cursor:pointer;">🗑️</button>':'') +
+    '</div></div>'
+  ).join("");
+
+  area.innerHTML = '<div style="padding:6px 12px 4px;display:flex;gap:6px;">' +
+    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:8px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Revenue</div><div style="font-size:14px;font-weight:800;color:#27AE60;">AED '+rev.toFixed(0)+'</div></div>' +
+    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:8px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Profit</div><div style="font-size:14px;font-weight:800;color:#3498DB;">AED '+profit.toFixed(0)+'</div></div>' +
+    '<div style="flex:1;background:#0F1E35;border-radius:10px;padding:8px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Orders</div><div style="font-size:14px;font-weight:800;color:#FFD700;">'+ms.length+'</div></div>' +
+    '</div>' +
+    '<div class="content-area">' + (ms.length===0?'<div style="text-align:center;padding:40px;color:#555;">No sales'+(selectedDay?' on '+selectedDay+' '+MONTHS[selectedMonthNum-1]:' this month')+'</div>':cards) +
+    (isEditor?'<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>':'') + '</div>';
+}
+
+function renderPurchases() {
+  const area = document.getElementById("mainContent"); if (!area) return;
+  const now = new Date();
+  let filtered = purchases;
+  if (purchaseFilter==="month") filtered = purchases.filter(p=>p.monthKey===getSelectedMonth());
+  else if (purchaseFilter==="last") {
+    const lm = now.getMonth()===0?11:now.getMonth()-1;
+    const ly = now.getMonth()===0?now.getFullYear()-1:now.getFullYear();
+    const lKey = ly+"-"+String(lm+1).padStart(2,"0");
+    filtered = purchases.filter(p=>p.monthKey===lKey);
+  }
+  if (selectedDay) filtered = filtered.filter(p => parseInt(p.date?.slice(8,10)) === selectedDay);
+  filtered = filtered.sort((a,b)=>b.date.localeCompare(a.date));
+  const totalSpent = filtered.reduce((a,p)=>a+(p.total||0),0);
+  const totalQty = filtered.reduce((a,p)=>a+(p.qty||0),0);
+
+  const grouped = {};
+  filtered.forEach(p => { if(!grouped[p.date])grouped[p.date]=[]; grouped[p.date].push(p); });
+
+  let groupsHtml = Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date => {
+    const items = grouped[date];
+    const dayTotal = items.reduce((s,p)=>s+(p.total||0),0);
+    const d = new Date(date+"T00:00:00");
+    const dateStr = d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+    const isOpen = !!purchaseExpanded[date];
+    let inner = isOpen ? '<div style="border-top:1px solid #0A1628;">' +
+      items.map(p =>
+        '<div class="purchase-item">' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;">📦 '+p.productName+'</div>' +
+        '<div style="font-size:11px;color:#888;">'+(p.supplier?'👤 '+p.supplier+' · ':'')+p.qty+' pcs'+(p.notes?' · '+p.notes:'')+'</div></div>' +
+        '<div style="text-align:right;"><div style="color:#27AE60;font-weight:700;font-size:13px;">AED '+(p.total||0).toFixed(2)+'</div>' +
+        '<div style="display:flex;gap:4px;margin-top:2px;justify-content:flex-end;">' +
+        (isEditor?'<button onclick="event.stopPropagation();openEditPurchase(\''+p.id+'\')" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px;">✏️</button>':'') +
+        (isEditor?'<button onclick="event.stopPropagation();deletePurchase(\''+p.id+'\')" style="background:none;border:none;color:#555;cursor:pointer;font-size:14px;">🗑️</button>':'') +
+        '</div></div></div>'
+      ).join("") +
+      (isEditor?'<div style="padding:8px 14px;background:#080F1E;border-top:1px solid #0A1628;"><button onclick="event.stopPropagation();openAddPurchase()" style="background:rgba(255,215,0,0.1);border:1px solid #FFD700;border-radius:6px;color:#FFD700;font-size:11px;padding:4px 12px;cursor:pointer;">+ Add</button></div>':'') +
+      '</div>' : "";
+    return '<div class="purchase-group">' +
+      '<div class="purchase-group-header" onclick="togglePurchaseDate(\''+date+'\')">'+
+      '<div><span style="font-size:13px;font-weight:700;color:#FFD700;">'+dateStr+'</span><span style="font-size:11px;color:#666;margin-left:8px;">'+items.length+' item'+(items.length>1?'s':'')+'</span></div>' +
+      '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;color:#27AE60;">AED '+dayTotal.toFixed(2)+'</span><span style="color:#666;font-size:12px;display:inline-block;transform:rotate('+(isOpen?'90':'0')+'deg);">▶</span></div>' +
+      '</div>' + inner + '</div>';
+  }).join("");
+
+  area.innerHTML = '<div style="padding:4px 12px 4px;display:flex;gap:6px;flex-wrap:wrap;">' +
+    '<button onclick="setPurchaseFilter(\'all\')" style="flex:1;padding:7px;border-radius:8px;border:1px solid '+(purchaseFilter==='all'?'#FFD700':'#1E3A5F')+';background:'+(purchaseFilter==='all'?'#FFD700':'transparent')+';color:'+(purchaseFilter==='all'?'#0A1628':'#888')+';font-size:12px;font-weight:700;cursor:pointer;">All</button>' +
+    '<button onclick="setPurchaseFilter(\'month\')" style="flex:1;padding:7px;border-radius:8px;border:1px solid '+(purchaseFilter==='month'?'#FFD700':'#1E3A5F')+';background:'+(purchaseFilter==='month'?'#FFD700':'transparent')+';color:'+(purchaseFilter==='month'?'#0A1628':'#888')+';font-size:12px;font-weight:700;cursor:pointer;">This Month</button>' +
+    '<button onclick="setPurchaseFilter(\'last\')" style="flex:1;padding:7px;border-radius:8px;border:1px solid '+(purchaseFilter==='last'?'#FFD700':'#1E3A5F')+';background:'+(purchaseFilter==='last'?'#FFD700':'transparent')+';color:'+(purchaseFilter==='last'?'#0A1628':'#888')+';font-size:12px;font-weight:700;cursor:pointer;">Last Month</button>' +
+    '</div>' +
+    '<div style="padding:4px 12px 4px;background:#0F1E35;margin:4px 12px;border-radius:10px;border:1px solid #1E3A5F;display:flex;justify-content:space-around;">' +
+    '<div style="text-align:center;padding:6px;"><div style="font-size:9px;color:#888;">Total Spent</div><div style="font-size:15px;font-weight:800;color:#E74C3C;">AED '+totalSpent.toFixed(0)+'</div></div>' +
+    '<div style="width:1px;background:#1E3A5F;"></div>' +
+    '<div style="text-align:center;padding:6px;"><div style="font-size:9px;color:#888;">Items</div><div style="font-size:15px;font-weight:800;color:#27AE60;">'+totalQty+'</div></div>' +
+    '<div style="width:1px;background:#1E3A5F;"></div>' +
+    '<div style="text-align:center;padding:6px;"><div style="font-size:9px;color:#888;">Records</div><div style="font-size:15px;font-weight:800;color:#FFD700;">'+filtered.length+'</div></div>' +
+    '</div>' +
+    '<div class="content-area">' + (filtered.length===0?'<div style="text-align:center;padding:40px;color:#555;">No purchase records</div>':groupsHtml) +
+    (isEditor?'<button class="add-btn" onclick="openAddPurchase()">+ Add Purchase</button>':'') + '</div>';
 }
 
 function renderDues() {
-  const area = document.getElementById("mainContent");
-  if (!area) return;
-  const pending = dues.filter(d => d.status !== "paid");
-  const paidDues = dues.filter(d => d.status === "paid");
-  const total = pending.reduce((a,d) => a+(d.amount-d.paid), 0);
-  let pendCards = pending.map(d => '<div style="background:#0F1E35;border:1px solid rgba(231,76,60,0.3);border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">' +
-    '<div style="font-size:28px;">👤</div>' +
-    '<div style="flex:1;"><div style="font-size:15px;font-weight:700;">' + d.customer + '</div>' +
-    '<div style="font-size:12px;color:#888;">' + d.date + (d.notes?' · '+d.notes:'') + '</div></div>' +
-    '<div style="text-align:right;"><div style="font-size:16px;font-weight:800;color:#E74C3C;">AED ' + (d.amount-d.paid).toFixed(2) + '</div>' +
-    (isEditor ? '<button onclick="markDuePaid(\'' + d.id + '\')" style="background:rgba(39,174,96,0.2);border:1px solid #27AE60;border-radius:8px;padding:4px 10px;color:#27AE60;font-size:11px;cursor:pointer;margin-top:4px;display:block;">✅ Paid</button>' : '') +
-    (isEditor ? '<button onclick="deleteDue(\'' + d.id + '\')" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:2px;">🗑️</button>' : '') +
-    '</div></div>').join("");
-  area.innerHTML = '<div style="padding:8px 12px 4px;"><div style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:12px;padding:12px;text-align:center;"><div style="font-size:11px;color:#888;">Total Pending</div><div style="font-size:22px;font-weight:800;color:#E74C3C;">AED ' + total.toFixed(2) + '</div></div></div>' +
-    '<div class="content-area">' + (pending.length === 0 ? '<div style="text-align:center;padding:30px;color:#555;">🎉 No pending dues!</div>' : pendCards) +
-    (paidDues.length > 0 ? '<div style="font-size:11px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 0 6px;">Paid</div>' + paidDues.slice(-10).map(d => '<div style="background:#080F1E;border:1px solid #1E3A5F;border-radius:12px;margin-bottom:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;opacity:0.6;"><div style="flex:1;font-size:13px;">' + d.customer + '</div><span style="font-size:12px;color:#27AE60;font-weight:700;">✅ AED ' + d.amount.toFixed(2) + '</span></div>').join("") : '') +
+  const area = document.getElementById("mainContent"); if (!area) return;
+  const pending = dues.filter(d=>d.status!=="paid");
+  const paidDues = dues.filter(d=>d.status==="paid");
+  const total = pending.reduce((a,d)=>a+(d.amount-d.paid),0);
+  const pendCards = pending.map(d =>
+    '<div style="background:#0F1E35;border:1px solid rgba(231,76,60,0.3);border-radius:14px;margin-bottom:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">' +
+    '<div style="font-size:26px;">👤</div>' +
+    '<div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+d.customer+'</div>' +
+    '<div style="font-size:11px;color:#888;">'+d.date+(d.notes?' · '+d.notes:'')+'</div></div>' +
+    '<div style="text-align:right;"><div style="font-size:15px;font-weight:800;color:#E74C3C;">AED '+(d.amount-d.paid).toFixed(2)+'</div>' +
+    (isEditor?'<button onclick="markDuePaid(\''+d.id+'\')" style="background:rgba(39,174,96,0.2);border:1px solid #27AE60;border-radius:8px;padding:4px 8px;color:#27AE60;font-size:11px;cursor:pointer;margin-top:4px;display:block;">✅ Paid</button>':'') +
+    (isEditor?'<button onclick="deleteDue(\''+d.id+'\')" style="background:none;border:none;color:#555;font-size:11px;cursor:pointer;">🗑️</button>':'') +
+    '</div></div>'
+  ).join("");
+  area.innerHTML = '<div style="padding:6px 12px 4px;"><div style="background:rgba(231,76,60,0.1);border:1px solid #E74C3C;border-radius:12px;padding:12px;text-align:center;"><div style="font-size:10px;color:#888;">Total Pending</div><div style="font-size:20px;font-weight:800;color:#E74C3C;">AED '+total.toFixed(2)+'</div></div></div>' +
+    '<div class="content-area">' + (pending.length===0?'<div style="text-align:center;padding:30px;color:#555;">🎉 No pending dues!</div>':pendCards) +
+    (paidDues.length>0?'<div style="font-size:10px;color:#555;font-weight:700;letter-spacing:1px;padding:8px 0 6px;">PAID DUES</div>'+paidDues.slice(-10).map(d=>'<div style="background:#080F1E;border:1px solid #1E3A5F;border-radius:10px;margin-bottom:5px;padding:9px 12px;display:flex;align-items:center;gap:10px;opacity:0.6;"><div style="flex:1;font-size:12px;">'+d.customer+'</div><span style="font-size:12px;color:#27AE60;font-weight:700;">✅ AED '+d.amount.toFixed(2)+'</span></div>').join(""):'') +
     '</div>';
 }
 
 function renderReport() {
-  const area = document.getElementById("mainContent");
-  if (!area) return;
-  const ms = sales.filter(s => s.monthKey === getSelectedMonth());
-  const rev = ms.reduce((a,s) => a+(s.total||0), 0);
-  const profit = ms.reduce((a,s) => a+(s.profit||0), 0);
-  const avg = ms.length > 0 ? rev/ms.length : 0;
-  const catMap = {}, prodMap = {}, payMap = { cash:0, card:0, due:0, online:0 };
-  ms.forEach(s => {
-    catMap[s.category||"Other"] = (catMap[s.category||"Other"]||0) + (s.total||0);
-    prodMap[s.productName] = (prodMap[s.productName]||0) + (s.qty||0);
-    payMap[s.payment] = (payMap[s.payment]||0) + (s.total||0);
-  });
-  const topCats = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,5);
-  const topProds = Object.entries(prodMap).sort((a,b) => b[1]-a[1]).slice(0,5);
-
-  let catBars = topCats.map(([cat, r]) => {
-    const pct = rev > 0 ? (r/rev*100).toFixed(0) : 0;
-    return '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span style="color:#ccc;">' + cat + '</span><span style="color:#FFD700;font-weight:700;">AED ' + r.toFixed(0) + ' (' + pct + '%)</span></div><div style="background:#0A1628;border-radius:4px;height:6px;overflow:hidden;"><div style="background:linear-gradient(90deg,#FFD700,#FFA500);height:100%;width:' + pct + '%;border-radius:4px;"></div></div></div>';
-  }).join("");
-  let topProdRows = topProds.map(([name, qty], i) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #0A1628;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:14px;color:#FFD700;font-weight:800;">' + (i+1) + '</span><span style="font-size:13px;">' + name + '</span></div><span style="font-size:12px;color:#888;">' + qty + ' sold</span></div>').join("");
-  let payRows = Object.entries(payMap).filter(([,v]) => v > 0).map(([m,a]) => '<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #0A1628;"><span style="color:#888;text-transform:capitalize;">💰 ' + m + '</span><span style="font-weight:700;">AED ' + a.toFixed(2) + '</span></div>').join("");
-  let stockRows = products.sort((a,b) => (a.stock||0)-(b.stock||0)).map(p => '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px solid #0A1628;"><span style="color:#ccc;">' + p.name + '</span><span style="color:' + (p.stock<=0?'#E74C3C':p.stock<=5?'#E67E22':'#27AE60') + ';font-weight:700;">' + (p.stock||0) + ' ' + (p.unit||'pcs') + '</span></div>').join("");
+  const area = document.getElementById("mainContent"); if (!area) return;
+  const ms = sales.filter(s=>s.monthKey===getSelectedMonth());
+  const rev = ms.reduce((a,s)=>a+(s.total||0),0);
+  const profit = ms.reduce((a,s)=>a+(s.profit||0),0);
+  const avg = ms.length>0?rev/ms.length:0;
+  const catMap={},prodMap={},payMap={cash:0,card:0,due:0,online:0};
+  ms.forEach(s=>{catMap[s.category||"Other"]=(catMap[s.category||"Other"]||0)+(s.total||0);prodMap[s.productName]=(prodMap[s.productName]||0)+(s.qty||0);payMap[s.payment]=(payMap[s.payment]||0)+(s.total||0);});
+  const topCats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topProds=Object.entries(prodMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const msPur = purchases.filter(p=>p.monthKey===getSelectedMonth());
+  const totalCost = msPur.reduce((a,p)=>a+(p.total||0),0);
 
   area.innerHTML = '<div class="content-area">' +
-    '<div class="rep-grid"><div class="rep-box"><div class="rep-val" style="color:#27AE60;">AED ' + rev.toFixed(0) + '</div><div class="rep-lbl">Revenue</div></div><div class="rep-box"><div class="rep-val" style="color:#3498DB;">AED ' + profit.toFixed(0) + '</div><div class="rep-lbl">Profit</div></div><div class="rep-box"><div class="rep-val">' + ms.length + '</div><div class="rep-lbl">Orders</div></div><div class="rep-box"><div class="rep-val" style="font-size:14px;">AED ' + avg.toFixed(0) + '</div><div class="rep-lbl">Avg/Order</div></div></div>' +
-    (topCats.length ? '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;"><div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📊 By Category</div>' + catBars + '</div>' : '') +
-    (topProds.length ? '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;"><div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">🏆 Top Products</div>' + topProdRows + '</div>' : '') +
-    '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;"><div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">💳 Payment Methods</div>' + (payRows || '<div style="color:#555;font-size:12px;text-align:center;">No data</div>') + '</div>' +
-    '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:14px;padding:14px;margin-bottom:10px;"><div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 Stock Overview</div>' + (stockRows || '<div style="color:#555;text-align:center;font-size:13px;">No products</div>') + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">' +
+    '<div style="background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Revenue</div><div style="font-size:16px;font-weight:800;color:#27AE60;">AED '+rev.toFixed(0)+'</div></div>' +
+    '<div style="background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Profit</div><div style="font-size:16px;font-weight:800;color:#3498DB;">AED '+profit.toFixed(0)+'</div></div>' +
+    '<div style="background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Orders</div><div style="font-size:16px;font-weight:800;color:#FFD700;">'+ms.length+'</div></div>' +
+    '<div style="background:#0F1E35;border-radius:10px;padding:10px;text-align:center;border:1px solid #1E3A5F;"><div style="font-size:9px;color:#888;">Purchase Cost</div><div style="font-size:16px;font-weight:800;color:#E74C3C;">AED '+totalCost.toFixed(0)+'</div></div>' +
+    '</div>' +
+    (topCats.length?'<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">📊 By Category</div>' +
+    topCats.map(([cat,r])=>{const pct=rev>0?(r/rev*100).toFixed(0):0;return '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;"><span style="color:#ccc;">'+cat+'</span><span style="color:#FFD700;font-weight:700;">AED '+r.toFixed(0)+' ('+pct+'%)</span></div><div style="background:#0A1628;border-radius:4px;height:5px;"><div style="background:linear-gradient(90deg,#FFD700,#FFA500);height:100%;width:'+pct+'%;border-radius:4px;"></div></div></div>';}).join('')+'</div>':'') +
+    (topProds.length?'<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">🏆 Top Products</div>' +
+    topProds.map(([name,qty],i)=>'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #0A1628;font-size:12px;"><div><span style="color:#FFD700;font-weight:800;margin-right:6px;">'+(i+1)+'</span>'+name+'</div><span style="color:#888;">'+qty+' sold</span></div>').join('')+'</div>':'') +
+    '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">💳 Payments</div>' +
+    Object.entries(payMap).filter(([,v])=>v>0).map(([m,a])=>'<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #0A1628;"><span style="color:#888;text-transform:capitalize;">💰 '+m+'</span><span style="font-weight:700;">AED '+a.toFixed(2)+'</span></div>').join('')+'</div>' +
+    '<div style="background:#0F1E35;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">📦 Stock</div>' +
+    products.sort((a,b)=>(a.stock||0)-(b.stock||0)).map(p=>'<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #0A1628;"><span style="color:#ccc;">'+p.name+'</span><span style="color:'+(p.stock<=0?'#E74C3C':p.stock<=5?'#E67E22':'#27AE60')+';font-weight:700;">'+(p.stock||0)+' '+(p.unit||'pcs')+'</span></div>').join('')+'</div>' +
     '</div>';
 }
 
 function manageModals() {
-  document.getElementById("addProductModal").style.display = addProductOpen ? "flex" : "none";
-  document.getElementById("editProductModal").style.display = editProduct ? "flex" : "none";
-  document.getElementById("addSaleModal").style.display = addSaleOpen ? "flex" : "none";
+  document.getElementById("addProductModal").style.display = addProductOpen?"flex":"none";
+  document.getElementById("editProductModal").style.display = editProduct?"flex":"none";
+  document.getElementById("addSaleModal").style.display = addSaleOpen?"flex":"none";
+  document.getElementById("addPurchaseModal").style.display = addPurchaseOpen?"flex":"none";
+  // populate dynamic category options
+  if (addProductOpen) {
+    const el = document.getElementById("pCategory");
+    if (el) { const cv=el.value; el.innerHTML=buildCatOptions(cv); }
+  }
+  if (editProduct) {
+    const el = document.getElementById("epCategory");
+    if (el) { const cv=el.value||editProduct?.category; el.innerHTML=buildCatOptions(cv); }
+  }
 }
 </script>
 
-<!-- Header -->
+<!-- HEADER -->
 <div class="header">
   <div class="header-top">
     <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:36px;height:36px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">💡</div>
-      <div>
-        <h1 style="margin:0;line-height:1;">Payel Shop</h1>
-        <div style="font-size:10px;color:#888;">Lights & Accessories</div>
-      </div>
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">💡</div>
+      <div><h1 style="margin:0;line-height:1;">Payel Shop</h1><div style="font-size:10px;color:#888;">Lights &amp; Accessories</div></div>
     </div>
-    <button class="lock-btn" onclick="logout()">🔒 Lock</button>
+    <div style="display:flex;gap:5px;align-items:center;">
+      <button id="themeBtn" onclick="toggleTheme()" style="background:rgba(255,255,255,0.06);border:none;border-radius:8px;padding:6px 8px;color:#888;font-size:14px;cursor:pointer;">☀️</button>
+      <button onclick="openShare()" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:8px;padding:6px 8px;color:#25D366;font-size:13px;cursor:pointer;">🔗</button>
+      <button onclick="logout()" style="background:rgba(255,255,255,0.06);border:none;border-radius:8px;padding:6px 10px;color:#888;font-size:12px;cursor:pointer;">🔒</button>
+    </div>
   </div>
   <div class="header-btns">
     <button class="hbtn" onclick="exportCSV()" style="color:#27AE60;border-color:#27AE60;">📥 CSV</button>
     <button class="hbtn" onclick="backupData()" style="color:#3498DB;border-color:#3498DB;">💾 Backup</button>
     <button class="hbtn" onclick="restoreData()">📂 Restore</button>
-    <button class="hbtn" onclick="openChangePass()" style="color:#FFD700;border-color:#FFD700;">🔐 Password</button>
+    <button class="hbtn" onclick="openChangePass()" style="color:#FFD700;border-color:#FFD700;">🔐 Pass</button>
     <button class="hbtn" id="headerInstallBtn" onclick="doInstall()" style="display:none;color:#9B59B6;border-color:#9B59B6;">📲 Install</button>
   </div>
 </div>
 <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="handleRestore(this)">
 
-<!-- Date Filter -->
+<!-- DATE FILTER -->
 <div class="date-dropdowns">
-  <select class="date-select" id="yearSelect" onchange="selectedYear=parseInt(this.value);renderAll()"></select>
-  <select class="date-select" id="monthSelect" onchange="selectedMonthNum=parseInt(this.value);renderAll()"></select>
+  <select class="date-select" id="yearSelect" onchange="selectedYear=parseInt(this.value);selectedDay=null;renderAll()"></select>
+  <select class="date-select" id="monthSelect" onchange="selectedMonthNum=parseInt(this.value);selectedDay=null;renderAll()"></select>
 </div>
 
-<!-- Stats -->
+<!-- CALENDAR -->
+<div id="calBar" class="cal-bar"></div>
+
+<!-- STATS -->
 <div class="stats">
   <div class="stat-box"><div class="stat-val" id="statRevenue" style="color:#27AE60;font-size:12px;">AED 0</div><div class="stat-lbl">Revenue</div></div>
   <div class="stat-box"><div class="stat-val" id="statProfit" style="color:#3498DB;font-size:12px;">AED 0</div><div class="stat-lbl">Profit</div></div>
   <div class="stat-box"><div class="stat-val" id="statOrders">0</div><div class="stat-lbl">Orders</div></div>
   <div class="stat-box"><div class="stat-val" id="statDue">0</div><div class="stat-lbl">Due</div></div>
-  <div class="stat-box"><div class="stat-val" id="statLowStock" style="color:#E67E22;font-size:12px;">0</div><div class="stat-lbl">Low Stock</div></div>
-  <div class="stat-box"><div class="stat-val" id="statOutStock" style="color:#E74C3C;font-size:12px;">0</div><div class="stat-lbl">Out Stock</div></div>
+  <div class="stat-box"><div class="stat-val" id="statLowStock" style="color:#E67E22;font-size:11px;">0</div><div class="stat-lbl">Low Stock</div></div>
+  <div class="stat-box"><div class="stat-val" id="statOutStock" style="color:#E74C3C;font-size:11px;">0</div><div class="stat-lbl">Out Stock</div></div>
 </div>
 
-<!-- Tabs -->
+<!-- TABS -->
 <div class="tabs">
   <div class="tab-bar">
     <button class="tab-btn" data-tab="products" onclick="setTab('products')" style="background:#FFD700;color:#0A1628;">📦 Products</button>
     <button class="tab-btn" data-tab="sales" onclick="setTab('sales')">💸 Sales</button>
+    <button class="tab-btn" data-tab="purchase" onclick="setTab('purchase')">🛒 Purchase</button>
     <button class="tab-btn" data-tab="dues" onclick="setTab('dues')">⚠️ Dues</button>
     <button class="tab-btn" data-tab="report" onclick="setTab('report')">📊 Report</button>
   </div>
 </div>
 
-<!-- Main Content -->
+<!-- MAIN CONTENT -->
 <div id="mainContent"></div>
 
-<!-- Add Product Modal -->
+<!-- ADD PRODUCT MODAL -->
 <div class="modal-bg" id="addProductModal" style="display:none;">
   <div class="modal">
     <h3>📦 Add Product</h3>
-    <label>Product Name *</label>
-    <input type="text" id="pName" placeholder="e.g. LED Strip 5M RGB"/>
-    <label>Category</label>
-    <select id="pCategory">
-      <option value="LED Strip">LED Strip</option>
-      <option value="Bulb">Bulb</option>
-      <option value="Ceiling Light">Ceiling Light</option>
-      <option value="Wall Light">Wall Light</option>
-      <option value="Spotlight">Spotlight</option>
-      <option value="Chandelier">Chandelier</option>
-      <option value="Outdoor Light">Outdoor Light</option>
-      <option value="Switch & Socket">Switch &amp; Socket</option>
-      <option value="Cable & Wire">Cable &amp; Wire</option>
-      <option value="Accessories">Accessories</option>
-      <option value="Other">Other</option>
-    </select>
+    <label>Product Name *</label><input type="text" id="pName" placeholder="e.g. LED Strip 5M RGB"/>
+    <label>Category</label><select id="pCategory"></select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div><label>Buy Price (AED)</label><input type="number" id="pBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updateProductCalc()"/></div>
-      <div><label>Sell Price (AED) *</label><input type="number" id="pSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateProductCalc()"/></div>
+      <div><label>Sell Price *</label><input type="number" id="pSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateProductCalc()"/></div>
     </div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
-      <div><label>Stock Quantity</label><input type="number" id="pStock" placeholder="0" min="0"/></div>
-      <div><label>Unit</label>
-        <select id="pUnit">
-          <option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option>
-        </select>
-      </div>
+      <div><label>Stock Qty</label><input type="number" id="pStock" placeholder="0" min="0"/></div>
+      <div><label>Unit</label><select id="pUnit"><option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option></select></div>
     </div>
     <label>Barcode / SKU</label>
-    <div style="display:flex;gap:8px;">
-      <input type="text" id="pBarcode" placeholder="Optional" style="flex:1;"/>
-      <button onclick="openScanner('add')" style="background:#1A2F4A;border:1px solid #3498DB;border-radius:10px;padding:10px 14px;color:#3498DB;font-size:16px;cursor:pointer;">📷</button>
-    </div>
-    <label>Notes</label>
-    <textarea id="pNotes" placeholder="Optional notes..."></textarea>
+    <div style="display:flex;gap:8px;"><input type="text" id="pBarcode" placeholder="Optional" style="flex:1;"/><button onclick="openScanner('add')" style="background:#1A2F4A;border:1px solid #3498DB;border-radius:10px;padding:10px 12px;color:#3498DB;font-size:16px;cursor:pointer;">📷</button></div>
+    <label>Notes</label><textarea id="pNotes" placeholder="Optional..."></textarea>
     <div class="calc-box" id="productCalcBox"><div style="color:#555;font-size:12px;text-align:center;">Enter prices to see margin</div></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeProductModal()">Cancel</button>
-      <button class="btn-primary" onclick="doAddProduct()">✅ Add Product</button>
-    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeProductModal()">Cancel</button><button class="btn-primary" onclick="doAddProduct()">✅ Add Product</button></div>
   </div>
 </div>
 
-<!-- Edit Product Modal -->
+<!-- EDIT PRODUCT MODAL -->
 <div class="modal-bg" id="editProductModal" style="display:none;">
   <div class="modal">
     <h3>✏️ Edit Product</h3>
-    <label>Product Name *</label>
-    <input type="text" id="epName"/>
-    <label>Category</label>
-    <select id="epCategory">
-      <option value="LED Strip">LED Strip</option>
-      <option value="Bulb">Bulb</option>
-      <option value="Ceiling Light">Ceiling Light</option>
-      <option value="Wall Light">Wall Light</option>
-      <option value="Spotlight">Spotlight</option>
-      <option value="Chandelier">Chandelier</option>
-      <option value="Outdoor Light">Outdoor Light</option>
-      <option value="Switch & Socket">Switch &amp; Socket</option>
-      <option value="Cable & Wire">Cable &amp; Wire</option>
-      <option value="Accessories">Accessories</option>
-      <option value="Other">Other</option>
-    </select>
+    <label>Product Name *</label><input type="text" id="epName"/>
+    <label>Category</label><select id="epCategory"></select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div><label>Buy Price (AED)</label><input type="number" id="epBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/></div>
-      <div><label>Sell Price (AED) *</label><input type="number" id="epSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/></div>
+      <div><label>Buy Price</label><input type="number" id="epBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/></div>
+      <div><label>Sell Price *</label><input type="number" id="epSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updateEditProductCalc()"/></div>
     </div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
-      <div><label>Stock Quantity</label><input type="number" id="epStock" min="0"/></div>
-      <div><label>Unit</label>
-        <select id="epUnit">
-          <option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option>
-        </select>
-      </div>
+      <div><label>Stock Qty</label><input type="number" id="epStock" min="0"/></div>
+      <div><label>Unit</label><select id="epUnit"><option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option></select></div>
     </div>
     <label>Barcode / SKU</label>
-    <div style="display:flex;gap:8px;">
-      <input type="text" id="epBarcode" style="flex:1;"/>
-      <button onclick="openScanner('edit')" style="background:#1A2F4A;border:1px solid #3498DB;border-radius:10px;padding:10px 14px;color:#3498DB;font-size:16px;cursor:pointer;">📷</button>
-    </div>
-    <label>Notes</label>
-    <textarea id="epNotes"></textarea>
+    <div style="display:flex;gap:8px;"><input type="text" id="epBarcode" style="flex:1;"/><button onclick="openScanner('edit')" style="background:#1A2F4A;border:1px solid #3498DB;border-radius:10px;padding:10px 12px;color:#3498DB;font-size:16px;cursor:pointer;">📷</button></div>
+    <label>Notes</label><textarea id="epNotes"></textarea>
     <div class="calc-box" id="editProductCalcBox"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeProductModal()">Cancel</button>
-      <button class="btn-primary" onclick="doEditProduct()">✅ Save Changes</button>
-    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeProductModal()">Cancel</button><button class="btn-primary" onclick="doEditProduct()">✅ Save</button></div>
   </div>
 </div>
 
-<!-- Add Sale Modal -->
+<!-- ADD SALE MODAL -->
 <div class="modal-bg" id="addSaleModal" style="display:none;">
   <div class="modal">
     <h3>💸 New Sale</h3>
-    <label>Date</label>
-    <input type="date" id="sDate"/>
-    <label>Product *</label>
-    <select id="sProduct" onchange="updateSaleCalc()">
-      <option value="">-- Select Product --</option>
-    </select>
+    <label>Date</label><input type="date" id="sDate"/>
+    <label>Product *</label><select id="sProduct" onchange="updateSaleCalc()"><option value="">-- Select Product --</option></select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div><label>Quantity *</label><input type="number" id="sQty" placeholder="1" min="1" oninput="updateSaleCalc()"/></div>
       <div><label>Discount (AED)</label><input type="number" id="sDiscount" placeholder="0" min="0" step="0.01" oninput="updateSaleCalc()"/></div>
     </div>
-    <label>Payment Method</label>
-    <select id="sPayment">
-      <option value="cash">💵 Cash</option>
-      <option value="card">💳 Card</option>
-      <option value="online">📱 Online Transfer</option>
-      <option value="due">⚠️ Due / Credit</option>
-    </select>
-    <label>Customer Name (optional)</label>
-    <input type="text" id="sCustomer" placeholder="e.g. Ahmed Ali"/>
-    <label>Notes</label>
-    <textarea id="sSaleNotes" placeholder="Optional..."></textarea>
+    <label>Payment</label>
+    <select id="sPayment"><option value="cash">💵 Cash</option><option value="card">💳 Card</option><option value="online">📱 Online</option><option value="due">⚠️ Due / Credit</option></select>
+    <label>Customer (optional)</label><input type="text" id="sCustomer" placeholder="e.g. Ahmed Ali"/>
+    <label>Notes</label><textarea id="sSaleNotes" placeholder="Optional..."></textarea>
     <div class="calc-box" id="saleCalcBox"><div style="color:#555;font-size:12px;text-align:center;">Select a product</div></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeSaleModal()">Cancel</button>
-      <button class="btn-primary" onclick="doAddSale()">✅ Save Sale</button>
-    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeSaleModal()">Cancel</button><button class="btn-primary" onclick="doAddSale()">✅ Save Sale</button></div>
   </div>
 </div>
 
-<!-- Change Password Modal -->
+<!-- ADD/EDIT PURCHASE MODAL -->
+<div class="modal-bg" id="addPurchaseModal" style="display:none;">
+  <div class="modal">
+    <h3 id="purModalTitle">🛒 Add Purchase</h3>
+    <label>Date *</label><input type="date" id="purDate"/>
+    <label>Supplier / Vendor</label><input type="text" id="purSupplier" placeholder="e.g. Al Noor Trading"/>
+    <label>Product Name *</label><input type="text" id="purProduct" placeholder="e.g. LED Strip 5M"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><label>Quantity *</label><input type="number" id="purQty" placeholder="0" min="1" oninput="updatePurCalc()"/></div>
+      <div><label>Cost/Unit (AED)</label><input type="number" id="purCost" placeholder="0.00" min="0" step="0.01" oninput="updatePurCalc()"/></div>
+    </div>
+    <label>Notes</label><textarea id="purNotes" placeholder="Optional..."></textarea>
+    <div class="calc-box" id="purCalcBox"><div style="color:#555;font-size:12px;text-align:center;">Enter qty &amp; cost</div></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closePurchaseModal()">Cancel</button><button class="btn-primary" onclick="doSavePurchase()">✅ Save</button></div>
+  </div>
+</div>
+
+<!-- CATEGORY MANAGER MODAL -->
+<div class="modal-bg" id="catModal" style="display:none;align-items:center;">
+  <div class="modal" style="border-radius:20px;margin:20px;">
+    <h3>⚙️ Manage Categories</h3>
+    <div id="catList"></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeCatModal()">Done</button></div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
 <div class="modal-bg" id="cpModal" style="display:none;align-items:center;">
   <div class="modal" style="border-radius:20px;margin:20px;">
     <h3>🔐 Change Password</h3>
-    <label>Current Password</label><input type="password" id="cpOld" placeholder="Current password"/>
-    <label>New Password</label><input type="password" id="cpNew" placeholder="Min 4 characters"/>
-    <label>Confirm Password</label><input type="password" id="cpConfirm" placeholder="Confirm new password"/>
+    <label>Current Password</label>
+    <div style="position:relative;"><input type="password" id="cpOld" placeholder="Current password" style="padding-right:44px;"/><button onclick="toggleEye('cpOld')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:16px;cursor:pointer;">👁️</button></div>
+    <label>New Password</label>
+    <div style="position:relative;"><input type="password" id="cpNew" placeholder="Min 4 characters" style="padding-right:44px;"/><button onclick="toggleEye('cpNew')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:16px;cursor:pointer;">👁️</button></div>
+    <label>Confirm Password</label>
+    <div style="position:relative;"><input type="password" id="cpConfirm" placeholder="Confirm" style="padding-right:44px;"/><button onclick="toggleEye('cpConfirm')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;font-size:16px;cursor:pointer;">👁️</button></div>
     <div id="cpError" style="color:#E74C3C;font-size:12px;margin-top:6px;display:none;"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeChangePass()">Cancel</button>
-      <button class="btn-primary" onclick="doChangePass()">✅ Change</button>
-    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeChangePass()">Cancel</button><button class="btn-primary" onclick="doChangePass()">✅ Change</button></div>
   </div>
 </div>
 
-<!-- Barcode Scanner Modal -->
+<!-- SCANNER MODAL -->
 <div id="scanModal" style="display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-  <div style="color:#FFD700;font-size:16px;font-weight:700;">📷 Point camera at barcode</div>
+  <div style="color:#FFD700;font-size:15px;font-weight:700;">📷 Point camera at barcode</div>
   <video id="scanVideo" style="width:90%;max-width:400px;border-radius:12px;border:2px solid #FFD700;" autoplay playsinline></video>
   <button onclick="closeScanner()" style="background:rgba(255,255,255,0.1);border:1px solid #555;border-radius:12px;padding:12px 30px;color:#fff;font-size:14px;cursor:pointer;">✕ Cancel</button>
 </div>
 
 <script>
-// Show install button in header too
-window.addEventListener('beforeinstallprompt', () => {
-  const btn = document.getElementById('headerInstallBtn');
-  if (btn) btn.style.display = 'block';
-});
-if (isEditor || isViewer) renderAll();
+if (isEditor || isViewer) { renderAll(); if(lightMode){document.getElementById("themeBtn").textContent="🌙";} }
 </script>
 </body>
 </html>
