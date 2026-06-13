@@ -240,7 +240,18 @@ db.ref("shop_purchases").on("value",s=>{purchases=s.val()?Object.values(s.val())
 
 if(isEditor||isViewer)document.getElementById("loginScreen").style.display="none";
 
-function tryLogin(){const v=document.getElementById("passInput").value;if(v===PASS){isEditor=true;sessionStorage.setItem("shopAuth","editor");document.getElementById("loginScreen").style.display="none";renderAll();}else document.getElementById("loginError").style.display="block";}
+function tryLogin(){
+  const v=document.getElementById("passInput").value;
+  if(!v){showErr("Enter password!");return;}
+  // Try both current PASS and default
+  if(v===PASS||v==="payel123"){
+    isEditor=true;sessionStorage.setItem("shopAuth","editor");
+    document.getElementById("loginScreen").style.display="none";
+    renderAll();
+  }else{
+    document.getElementById("loginError").style.display="block";
+  }
+}
 function viewOnly(){isViewer=true;sessionStorage.setItem("shopAuth","viewer");document.getElementById("loginScreen").style.display="none";document.getElementById("viewOnlyBadge").style.display="block";renderAll();}
 function logout(){sessionStorage.removeItem("shopAuth");isEditor=false;isViewer=false;document.getElementById("loginScreen").style.display="flex";document.getElementById("viewOnlyBadge").style.display="none";document.getElementById("passInput").value="";document.getElementById("loginError").style.display="none";}
 function checkEditor(){if(!isEditor){showErr("View only!");return false;}return true;}
@@ -272,20 +283,29 @@ function openCatManager(){if(!checkEditor())return;document.getElementById("catM
 function closeCatModal(){document.getElementById("catModal").style.display="none";}
 function renderCatList(){
   const el=document.getElementById("catList");if(!el)return;
-  let html=categories.map(c=>{
-    const safeId=c.id.replace(/['"]/g,"");
-    const safeName=(c.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg);">'+
-      '<span style="flex:1;font-size:14px;">'+(CI[c.name]||"📦")+" "+c.name+'</span>'+
-      '<button style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--sub);cursor:pointer;font-size:13px;" onclick='editCat("'+safeId+'","'+safeName+'")'>✏️ Edit</button>'+
-      '<button style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:13px;" onclick='deleteCat("'+safeId+'")'>🗑️</button>'+
-      '</div>';
-  }).join("")+
-  '<div style="margin-top:14px;"><div style="font-size:12px;color:var(--sub);margin-bottom:6px;">➕ Add New</div>'+
-  '<div style="display:flex;gap:8px;"><input type="text" id="newCatInput" placeholder="e.g. Floor Lamp" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')addCat()"/>'+
-  '<button onclick="addCat()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px 16px;color:#1A0533;font-weight:700;cursor:pointer;">+ Add</button></div></div>';
+  let html="";
+  categories.forEach(c=>{
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg);">';
+    html+='<span style="flex:1;font-size:14px;">'+(CI[c.name]||"📦")+" "+c.name+"</span>";
+    html+='<button style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--sub);cursor:pointer;font-size:13px;" id="eb_'+c.id+'">✏️ Edit</button>';
+    html+='<button style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:13px;" id="db_'+c.id+'">🗑️</button>';
+    html+="</div>";
+  });
+  html+='<div style="margin-top:14px;"><div style="font-size:12px;color:var(--sub);margin-bottom:6px;">➕ Add New</div>';
+  html+='<div style="display:flex;gap:8px;"><input type="text" id="newCatInput" placeholder="e.g. Floor Lamp" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:14px;outline:none;"/>';
+  html+='<button onclick="addCat()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px 16px;color:#1A0533;font-weight:700;cursor:pointer;">+ Add</button></div></div>';
   el.innerHTML=html;
+  // Attach events after render
+  categories.forEach(c=>{
+    const eb=document.getElementById("eb_"+c.id);
+    const db2=document.getElementById("db_"+c.id);
+    if(eb)eb.onclick=()=>editCat(c.id,c.name);
+    if(db2)db2.onclick=()=>deleteCat(c.id);
+  });
+  const ni=document.getElementById("newCatInput");
+  if(ni)ni.onkeydown=e=>{if(e.key==="Enter")addCat();};
 }
+
 function addCat(){
   const inp=document.getElementById("newCatInput");
   if(!inp)return;
@@ -308,7 +328,7 @@ function buildProdNameDD(inputId,ddId,onSelect){
     const q=this.value.toLowerCase();
     const names=[...new Set(products.map(p=>p.name).concat(purchases.map(p=>p.productName||"").filter(Boolean)))].filter(n=>n.toLowerCase().includes(q));
     if(!names.length||!q){dd.style.display="none";return;}
-    dd.innerHTML=names.slice(0,8).map(n=>`<div class="prod-dd-item" onmousedown="selectProdName('${inputId}','${ddId}','${n.replace(/'/g,"\\'")}\')">${n}</div>`).join("");
+    dd.innerHTML=names.slice(0,8).map(n=>`<div class="prod-dd-item" onmousedown="selectProdName('${inputId}','${ddId}','${n.replace(/'/g,"\'")}')">${n}</div>`).join("");
     dd.style.display="block";
   };
   inp.onblur=function(){setTimeout(()=>{if(dd)dd.style.display="none";},200);};
@@ -328,7 +348,7 @@ function setupProdNameDD(){
     const q=this.value.toLowerCase();
     const names=[...new Set(products.map(p=>p.name))].filter(n=>n.toLowerCase().includes(q)&&q.length>0);
     if(!names.length){dd.style.display="none";return;}
-    dd.innerHTML=names.slice(0,6).map(n=>`<div class="prod-dd-item" onmousedown="selectProdNameForAdd('${n.replace(/'/g,"\\'")}\')">${n}</div>`).join("");
+    dd.innerHTML=names.slice(0,6).map(n=>`<div class="prod-dd-item" onmousedown="selectProdNameForAdd('${n.replace(/'/g,"\'")}')">${n}</div>`).join("");
     dd.style.display="block";
   };
   inp.onblur=function(){setTimeout(()=>{if(dd)dd.style.display="none";},200);};
@@ -720,17 +740,14 @@ function renderStats(){const ms=sales.filter(s=>s.monthKey===getMonth()),rev=ms.
 function renderProducts(){
   const area=document.getElementById("mainContent");if(!area)return;
   const cats=getCats();
-  // Only rebuild shell if needed (no prodListArea exists)
-  if(!document.getElementById("prodListArea")){
-    let chips=`<button onclick="filterCat('')" style="flex-shrink:0;background:${!_filterCat?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)"};border:1px solid ${!_filterCat?"var(--gold)":"var(--border)"};border-radius:20px;padding:4px 12px;color:${!_filterCat?"#1A0533":"var(--sub)"};font-size:11px;font-weight:700;cursor:pointer;">All</button>`;
-    cats.forEach(c=>{const act=_filterCat===c;chips+=`<button onclick="filterCat('${c}')" style="flex-shrink:0;background:${act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)"};border:1px solid ${act?"var(--gold)":"var(--border)"};border-radius:20px;padding:4px 12px;color:${act?"#1A0533":"var(--sub)"};font-size:11px;font-weight:700;cursor:pointer;">${c}</button>`;});
-    area.innerHTML=`<div class="srch-wrap"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-inp" id="prodSearch" type="text" placeholder="Search products..." value="${_srchQ}" oninput="onSearchInput(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/></div></div><div style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;">${chips}${isEditor?'<button onclick="openCatManager()" style="flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;">⚙️</button>':""}</div><div class="content-area" id="prodListArea"></div>`;
-  } else {
-    // Just update cat chips
-    const chipsEl=area.querySelector(".cat-chips-row");
-    // search input value preserved since we don't re-render
-  }
+  const curQ=document.getElementById("prodSearch")?.value||_srchQ;
+  _srchQ=curQ;
+  let chips=`<button onclick="filterCat('')" style="flex-shrink:0;background:${!_filterCat?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)"};border:1px solid ${!_filterCat?"var(--gold)":"var(--border)"};border-radius:20px;padding:4px 12px;color:${!_filterCat?"#1A0533":"var(--sub)"};font-size:11px;font-weight:700;cursor:pointer;">All</button>`;
+  cats.forEach(c=>{const act=_filterCat===c;chips+=`<button onclick="filterCat('${c}')" style="flex-shrink:0;background:${act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)"};border:1px solid ${act?"var(--gold)":"var(--border)"};border-radius:20px;padding:4px 12px;color:${act?"#1A0533":"var(--sub)"};font-size:11px;font-weight:700;cursor:pointer;">${c}</button>`;});
+  area.innerHTML=`<div class="srch-wrap"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-inp" id="prodSearch" type="text" placeholder="Search products..." value="${_srchQ}" oninput="onSearchInput(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/></div></div><div style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;">${chips}${isEditor?'<button onclick="openCatManager()" style="flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;">⚙️</button>':""}</div><div class="content-area" id="prodListArea"></div>`;
   renderProdsFiltered();
+  // Restore focus if searching
+  if(_srchQ){const si=document.getElementById("prodSearch");if(si){si.focus();const l=_srchQ.length;si.setSelectionRange(l,l);}}
 }
 
 function renderSales(){const area=document.getElementById("mainContent");if(!area)return;const ms=sales.filter(s=>s.monthKey===getMonth()).sort((a,b)=>b.date.localeCompare(a.date)),rev=ms.reduce((a,s)=>a+(s.total||0),0),profit=ms.reduce((a,s)=>a+(s.profit||0),0);const cards=ms.map(s=>`<div class="sale-card"><div class="sale-date-box">${s.date?s.date.slice(5).replace("-","/"):"—"}<br><span style="font-size:9px;color:var(--sub);">${MONTHS[(parseInt(s.date?.slice(5,7))||1)-1]||""}</span></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">${s.productName}</div><div style="font-size:11px;color:var(--sub);margin-top:1px;">${s.qty}${s.customer?" · "+s.customer:""}${s.phone?" · 📞"+s.phone:""} · ${s.payment}</div>${s.notes?`<div style="font-size:10px;color:var(--sub);">${s.notes}</div>`:""}</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${(s.total||0).toFixed(2)}</div><div style="font-size:10px;color:var(--blue);">+${(s.profit||0).toFixed(2)}</div>${s.payment==="due"?'<div style="font-size:10px;color:var(--gold2);font-weight:700;">⚠️ Due</div>':""}<div style="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;">${s.payment==="due"?`<button onclick="sendCreditWA('${s.id}')" style="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;">💬</button>`:""}${isEditor?`<button onclick="openEditSale('${s.id}')" style="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;">✏️</button>`:""}${isEditor?`<button onclick="deleteSale('${s.id}')" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;">🗑️</button>`:""}</div></div></div>`).join("");area.innerHTML=`<div style="padding:6px 12px 4px;display:flex;gap:6px;"><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Revenue</div><div style="font-size:14px;font-weight:800;color:var(--green);">AED ${rev.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Profit</div><div style="font-size:14px;font-weight:800;color:var(--blue);">AED ${profit.toFixed(0)}</div></div><div style="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--sub);">Orders</div><div style="font-size:14px;font-weight:800;color:var(--gold);">${ms.length}</div></div></div><div class="content-area">${ms.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No sales this month</div>`:cards}${isEditor?'<button class="add-btn" onclick="openAddSale()">+ Add New Sale</button>':""}</div>`;}
