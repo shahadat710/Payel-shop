@@ -308,14 +308,20 @@ function renderCatList(){
 
 function addCat(){
   const inp=document.getElementById("newCatInput");
-  if(!inp)return;
-  const v=inp.value.trim();
-  if(!v){showErr("Enter category name!");return;}
-  const id=Date.now().toString()+Math.random().toString(36).slice(2,4);
+  if(!inp){showErr("Input not found!");return;}
+  const v=(inp.value||"").trim();
+  if(!v){
+    inp.focus();
+    inp.style.borderColor="var(--red)";
+    setTimeout(()=>{if(inp)inp.style.borderColor="var(--border)";},2000);
+    showErr("Category name likhte hobe!");
+    return;
+  }
+  const id="cat_"+Date.now().toString(36);
   db.ref("shop_categories/"+id).set({id,name:v});
   inp.value="";
+  inp.focus();
   showNotif("✅ "+v+" added!");
-  // renderCatList will be called by firebase listener
 }
 function editCat(id,old){const n=prompt("Edit category:",old);if(!n||!n.trim())return;db.ref("shop_categories/"+id+"/name").set(n.trim());showNotif("✅ Updated!");}
 function deleteCat(id){if(!confirm("Delete?"))return;db.ref("shop_categories/"+id).remove();showNotif("🗑️ Deleted");}
@@ -487,9 +493,21 @@ let _imgOriginal = null;
 function openImgPicker(mode, prodId){
   _imgMode = mode;
   _imgProdId = prodId || null;
-  // Use file input
-  const inp = document.getElementById("imgFileInput");
-  if(inp){ inp.value=""; inp.click(); }
+  // Show choice: camera or gallery
+  document.getElementById("imgChoiceModal").style.display="flex";
+}
+function openCamera(){
+  document.getElementById("imgChoiceModal").style.display="none";
+  const inp=document.getElementById("imgCameraInput");
+  if(inp){inp.value="";inp.click();}
+}
+function openGallery(){
+  document.getElementById("imgChoiceModal").style.display="none";
+  const inp=document.getElementById("imgGalleryInput");
+  if(inp){inp.value="";inp.click();}
+}
+function closeImgChoice(){
+  document.getElementById("imgChoiceModal").style.display="none";
 }
 function openImageUpload(prodId){
   openImgPicker('prod', prodId);
@@ -937,6 +955,32 @@ function manageModals(){document.getElementById("addProductModal").style.display
     <div id="cpError" style="color:var(--red);font-size:12px;margin-top:6px;display:none;"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeChangePass()">Cancel</button><button class="btn-primary" onclick="doChangePass()">✅ Change</button></div>
   </div>
+</div>
+<!-- HIDDEN FILE INPUTS -->
+<input type="file" id="imgCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleImgFileInput(this)"/>
+<input type="file" id="imgGalleryInput" accept="image/*" style="display:none" onchange="handleImgFileInput(this)"/>
+
+<!-- IMAGE SOURCE CHOICE MODAL -->
+<div id="imgChoiceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:550;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;border-top:2px solid var(--border);">
+    <div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:16px;text-align:center;">🖼️ Product Image</div>
+    <button onclick="openCamera()" style="width:100%;background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:12px;padding:14px;color:var(--accent2);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">📷 Camera theke tolo</button>
+    <button onclick="openGallery()" style="width:100%;background:rgba(255,215,0,0.1);border:1px solid var(--gold);border-radius:12px;padding:14px;color:var(--gold);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">🖼️ Gallery theke choose koro</button>
+    <button onclick="closeImgChoice()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">✕ Cancel</button>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div id="cropModal" style="display:none;position:fixed;inset:0;background:#000;z-index:600;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px;overflow-y:auto;">
+  <div style="color:var(--gold);font-size:14px;font-weight:700;padding:10px;text-align:center;">✂️ Drag to position · Resize with buttons</div>
+  <canvas id="cropCanvas" style="border:2px solid var(--gold);border-radius:10px;touch-action:none;max-width:calc(100vw - 20px);"></canvas>
+  <div style="display:flex;gap:8px;margin-top:12px;width:100%;max-width:460px;">
+    <button onclick="cropSizeChange(-30)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:18px;cursor:pointer;">🔍−</button>
+    <button onclick="cropSizeChange(30)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:18px;cursor:pointer;">🔍+</button>
+    <button onclick="saveCroppedImage()" style="flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px;color:#1A0533;font-size:14px;font-weight:800;cursor:pointer;">✅ Use This</button>
+    <button onclick="closeCropModal()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--sub);font-size:14px;cursor:pointer;">✕</button>
+  </div>
+  <div style="font-size:11px;color:var(--sub);margin-top:8px;text-align:center;">Drag golden box · 🔍 to resize</div>
 </div>
 
 
