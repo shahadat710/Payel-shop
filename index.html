@@ -272,10 +272,31 @@ function openCatManager(){if(!checkEditor())return;document.getElementById("catM
 function closeCatModal(){document.getElementById("catModal").style.display="none";}
 function renderCatList(){
   const el=document.getElementById("catList");if(!el)return;
-  el.innerHTML=categories.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg);"><span style="flex:1;font-size:14px;">${CI[c.name]||"📦"} ${c.name}</span><button onclick="editCat('${c.id}','${c.name.replace(/'/g,"\\'")}\')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--sub);cursor:pointer;font-size:13px;">✏️ Edit</button><button onclick="deleteCat('${c.id}')" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:13px;">🗑️</button></div>`).join("")+
-  `<div style="margin-top:14px;"><div style="font-size:12px;color:var(--sub);margin-bottom:6px;">Add New</div><div style="display:flex;gap:8px;"><input type="text" id="newCatInput" placeholder="Category name..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')addCat()"/><button onclick="addCat()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px 16px;color:#1A0533;font-weight:700;cursor:pointer;">+ Add</button></div></div>`;
+  let html=categories.map(c=>{
+    const safeId=c.id.replace(/['"]/g,"");
+    const safeName=(c.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg);">'+
+      '<span style="flex:1;font-size:14px;">'+(CI[c.name]||"📦")+" "+c.name+'</span>'+
+      '<button style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--sub);cursor:pointer;font-size:13px;" onclick='editCat("'+safeId+'","'+safeName+'")'>✏️ Edit</button>'+
+      '<button style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:13px;" onclick='deleteCat("'+safeId+'")'>🗑️</button>'+
+      '</div>';
+  }).join("")+
+  '<div style="margin-top:14px;"><div style="font-size:12px;color:var(--sub);margin-bottom:6px;">➕ Add New</div>'+
+  '<div style="display:flex;gap:8px;"><input type="text" id="newCatInput" placeholder="e.g. Floor Lamp" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')addCat()"/>'+
+  '<button onclick="addCat()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:11px 16px;color:#1A0533;font-weight:700;cursor:pointer;">+ Add</button></div></div>';
+  el.innerHTML=html;
 }
-function addCat(){const v=document.getElementById("newCatInput")?.value.trim();if(!v)return;const id=Date.now().toString();db.ref("shop_categories/"+id).set({id,name:v});document.getElementById("newCatInput").value="";showNotif("✅ Added!");renderCatList();}
+function addCat(){
+  const inp=document.getElementById("newCatInput");
+  if(!inp)return;
+  const v=inp.value.trim();
+  if(!v){showErr("Enter category name!");return;}
+  const id=Date.now().toString()+Math.random().toString(36).slice(2,4);
+  db.ref("shop_categories/"+id).set({id,name:v});
+  inp.value="";
+  showNotif("✅ "+v+" added!");
+  // renderCatList will be called by firebase listener
+}
 function editCat(id,old){const n=prompt("Edit category:",old);if(!n||!n.trim())return;db.ref("shop_categories/"+id+"/name").set(n.trim());showNotif("✅ Updated!");}
 function deleteCat(id){if(!confirm("Delete?"))return;db.ref("shop_categories/"+id).remove();showNotif("🗑️ Deleted");}
 
@@ -327,9 +348,63 @@ function selectProdNameForAdd(name){
   }
 }
 function closeProductModal(){addProductOpen=false;editProduct=null;renderAll();}
-function doAddProduct(){const name=document.getElementById("pName").value.trim(),cat=document.getElementById("pCategory").value,buy=parseFloat(document.getElementById("pBuyPrice").value)||0,sell=parseFloat(document.getElementById("pSellPrice").value)||0,stock=parseInt(document.getElementById("pStock").value)||0,min=parseInt(document.getElementById("pMinStock").value)||5,unit=document.getElementById("pUnit").value||"pcs",bar=document.getElementById("pBarcode").value.trim(),notes=document.getElementById("pNotes").value.trim();if(!name){showErr("Name required!");return;}if(sell<=0){showErr("Sell price required!");return;}const id=Date.now().toString();db.ref("shop_products/"+id).set({id,name,category:cat,buyPrice:buy,sellPrice:sell,stock,minStock:min,unit,barcode:bar,notes,createdAt:new Date().toISOString()});addProductOpen=false;showNotif("✅ "+name+" added!");renderAll();}
-function openEditProduct(id){if(!checkEditor())return;editProduct=products.find(p=>p.id===id);if(!editProduct)return;renderAll();setTimeout(()=>{document.getElementById("epName").value=editProduct.name||"";document.getElementById("epBuyPrice").value=editProduct.buyPrice||"";document.getElementById("epSellPrice").value=editProduct.sellPrice||"";document.getElementById("epStock").value=editProduct.stock||0;document.getElementById("epMinStock").value=editProduct.minStock||5;document.getElementById("epUnit").value=editProduct.unit||"pcs";document.getElementById("epBarcode").value=editProduct.barcode||"";document.getElementById("epNotes").value=editProduct.notes||"";updateEPC();},50);}
-function doEditProduct(){const name=document.getElementById("epName").value.trim(),cat=document.getElementById("epCategory").value,buy=parseFloat(document.getElementById("epBuyPrice").value)||0,sell=parseFloat(document.getElementById("epSellPrice").value)||0,stock=parseInt(document.getElementById("epStock").value)||0,min=parseInt(document.getElementById("epMinStock").value)||5,unit=document.getElementById("epUnit").value||"pcs",bar=document.getElementById("epBarcode").value.trim(),notes=document.getElementById("epNotes").value.trim();if(!name){showErr("Name required!");return;}db.ref("shop_products/"+editProduct.id).set({...editProduct,name,category:cat,buyPrice:buy,sellPrice:sell,stock,minStock:min,unit,barcode:bar,notes});editProduct=null;showNotif("✅ Updated!");renderAll();}
+function doAddProduct(){
+  const name=document.getElementById("pName").value.trim(),cat=document.getElementById("pCategory").value,
+    buy=parseFloat(document.getElementById("pBuyPrice").value)||0,
+    sell=parseFloat(document.getElementById("pSellPrice").value)||0,
+    stock=parseInt(document.getElementById("pStock").value)||0,
+    min=parseInt(document.getElementById("pMinStock").value)||5,
+    unit=document.getElementById("pUnit").value||"pcs",
+    bar=document.getElementById("pBarcode").value.trim(),
+    notes=document.getElementById("pNotes").value.trim(),
+    image=window._addProdImg||null;
+  if(!name){showErr("Name required!");return;}
+  if(sell<=0){showErr("Sell price required!");return;}
+  const id=Date.now().toString();
+  const prod={id,name,category:cat,buyPrice:buy,sellPrice:sell,stock,minStock:min,unit,barcode:bar,notes,createdAt:new Date().toISOString()};
+  if(image)prod.image=image;
+  db.ref("shop_products/"+id).set(prod);
+  window._addProdImg=null;
+  addProductOpen=false;showNotif("✅ "+name+" added!");renderAll();
+}
+function openEditProduct(id){
+  if(!checkEditor())return;
+  editProduct=products.find(p=>p.id===id);if(!editProduct)return;
+  window._editProdImg=null;
+  renderAll();
+  setTimeout(()=>{
+    document.getElementById("epName").value=editProduct.name||"";
+    document.getElementById("epBuyPrice").value=editProduct.buyPrice||"";
+    document.getElementById("epSellPrice").value=editProduct.sellPrice||"";
+    document.getElementById("epStock").value=editProduct.stock||0;
+    document.getElementById("epMinStock").value=editProduct.minStock||5;
+    document.getElementById("epUnit").value=editProduct.unit||"pcs";
+    document.getElementById("epBarcode").value=editProduct.barcode||"";
+    document.getElementById("epNotes").value=editProduct.notes||"";
+    // Show existing image
+    const pw=document.getElementById("epImgPreviewWrap");
+    const pi=document.getElementById("epImgPreview");
+    if(pw&&pi&&editProduct.image){pw.style.display="block";pi.src=editProduct.image;}
+    else if(pw){pw.style.display="none";}
+    updateEPC();
+  },50);
+}
+function doEditProduct(){
+  const name=document.getElementById("epName").value.trim(),cat=document.getElementById("epCategory").value,
+    buy=parseFloat(document.getElementById("epBuyPrice").value)||0,
+    sell=parseFloat(document.getElementById("epSellPrice").value)||0,
+    stock=parseInt(document.getElementById("epStock").value)||0,
+    min=parseInt(document.getElementById("epMinStock").value)||5,
+    unit=document.getElementById("epUnit").value||"pcs",
+    bar=document.getElementById("epBarcode").value.trim(),
+    notes=document.getElementById("epNotes").value.trim();
+  if(!name){showErr("Name required!");return;}
+  const updated={...editProduct,name,category:cat,buyPrice:buy,sellPrice:sell,stock,minStock:min,unit,barcode:bar,notes};
+  if(window._editProdImg)updated.image=window._editProdImg;
+  db.ref("shop_products/"+editProduct.id).set(updated);
+  window._editProdImg=null;
+  editProduct=null;showNotif("✅ Updated!");renderAll();
+}
 function deleteProduct(id){if(!confirm("Delete?"))return;db.ref("shop_products/"+id).remove();showNotif("🗑️ Deleted");}
 function updatePC(){const b=parseFloat(document.getElementById("pBuyPrice")?.value)||0,s=parseFloat(document.getElementById("pSellPrice")?.value)||0,p=s-b,m=s>0?((p/s)*100).toFixed(1):0;const el=document.getElementById("productCalcBox");if(el)el.innerHTML=`<div class="calc-row"><span class="clbl">Buy</span><span>AED ${b.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Sell</span><span>AED ${s.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Profit</span><span class="${p>=0?"cg":"cr"}">${p>=0?"+":""}AED ${p.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Margin</span><span class="cgo">${m}%</span></div>`;}
 function updateEPC(){const b=parseFloat(document.getElementById("epBuyPrice")?.value)||0,s=parseFloat(document.getElementById("epSellPrice")?.value)||0,p=s-b,m=s>0?((p/s)*100).toFixed(1):0;const el=document.getElementById("editProductCalcBox");if(el)el.innerHTML=`<div class="calc-row"><span class="clbl">Buy</span><span>AED ${b.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Sell</span><span>AED ${s.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Profit</span><span class="${p>=0?"cg":"cr"}">${p>=0?"+":""}AED ${p.toFixed(2)}</span></div><div class="calc-row"><span class="clbl">Margin</span><span class="cgo">${m}%</span></div>`;}
@@ -378,59 +453,131 @@ let scanStream=null,scanTarget=null;
 function openScanner(t){scanTarget=t;document.getElementById("scanModal").style.display="flex";navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>{scanStream=s;const v=document.getElementById("scanVideo");v.srcObject=s;v.play();if('BarcodeDetector' in window){const det=new BarcodeDetector({formats:['ean_13','ean_8','qr_code','code_128','code_39','upc_a','upc_e']});function detect(){if(!scanStream)return;det.detect(v).then(bs=>{if(bs.length>0){const code=bs[0].rawValue;const fid=scanTarget==='edit'?'epBarcode':'pBarcode';const el=document.getElementById(fid);if(el)el.value=code;showNotif("✅ Scanned: "+code);closeScanner();}else requestAnimationFrame(detect);}).catch(()=>requestAnimationFrame(detect));}requestAnimationFrame(detect);}else{showErr("Scanner not supported");closeScanner();}}).catch(()=>{showErr("Camera denied!");closeScanner();});}
 function closeScanner(){if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}document.getElementById("scanModal").style.display="none";}
 
-// IMAGE UPLOAD WITH CROP
-let imgCropData = {prodId:null, originalImg:null, crop:{x:0,y:0,w:1,h:1}};
+// ── IMAGE SYSTEM WITH CROP ──
+let _imgMode = null; // 'add', 'edit', 'prod'
+let _imgProdId = null;
+let _cropImg = null;
+let _cropCanvas = null;
+let _cropCtx = null;
+let _cropDrag = false;
+let _cropStart = {x:0,y:0};
+let _cropRect = {x:0,y:0,w:200,h:200};
+let _imgOriginal = null;
+
+function openImgPicker(mode, prodId){
+  _imgMode = mode;
+  _imgProdId = prodId || null;
+  // Use file input
+  const inp = document.getElementById("imgFileInput");
+  if(inp){ inp.value=""; inp.click(); }
+}
 function openImageUpload(prodId){
-  imgCropData.prodId = prodId;
-  document.getElementById("imgUploadModal").style.display="flex";
-  document.getElementById("imgPreview").src="";
-  document.getElementById("imgPreview").style.display="none";
-  document.getElementById("imgCropArea").style.display="none";
-  document.getElementById("imgSaveBtn").style.display="none";
+  openImgPicker('prod', prodId);
 }
-function closeImageModal(){
-  document.getElementById("imgUploadModal").style.display="none";
-  imgCropData = {prodId:null, originalImg:null, crop:{x:0,y:0,w:1,h:1}};
-}
-function handleImageFile(input){
-  const file = input.files[0]; if(!file) return;
+
+function handleImgFileInput(inp){
+  const file = inp.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    imgCropData.originalImg = e.target.result;
-    const preview = document.getElementById("imgPreview");
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    document.getElementById("imgCropArea").style.display = "block";
-    document.getElementById("imgSaveBtn").style.display = "block";
+    _imgOriginal = e.target.result;
+    // Open crop modal
+    document.getElementById("cropModal").style.display = "flex";
+    initCropCanvas(_imgOriginal);
   };
   reader.readAsDataURL(file);
 }
-function saveProductImage(){
-  if(!imgCropData.prodId || !imgCropData.originalImg){showErr("No image selected!");return;}
-  // Crop and resize using canvas
+
+function initCropCanvas(src){
   const img = new Image();
   img.onload = function(){
-    const canvas = document.createElement("canvas");
-    const maxSize = 400;
-    // Simple center crop to square
-    const size = Math.min(img.width, img.height);
-    const sx = (img.width - size) / 2;
-    const sy = (img.height - size) / 2;
-    canvas.width = maxSize; canvas.height = maxSize;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, sx, sy, size, size, 0, 0, maxSize, maxSize);
-    const compressed = canvas.toDataURL("image/jpeg", 0.7);
-    db.ref("shop_products/"+imgCropData.prodId+"/image").set(compressed);
-    showNotif("✅ Image saved!");
-    closeImageModal();
+    _cropImg = img;
+    const canvas = document.getElementById("cropCanvas");
+    const maxW = Math.min(window.innerWidth - 40, 440);
+    const scale = maxW / img.width;
+    canvas.width = maxW;
+    canvas.height = img.height * scale;
+    _cropCtx = canvas.getContext("2d");
+    // Init crop rect as center square
+    const side = Math.min(canvas.width, canvas.height) * 0.8;
+    _cropRect = {x:(canvas.width-side)/2, y:(canvas.height-side)/2, w:side, h:side};
+    drawCrop();
+    // Touch/mouse events
+    canvas.ontouchstart = e=>{ e.preventDefault(); const t=e.touches[0]; const r=canvas.getBoundingClientRect(); _cropDrag=true; _cropStart={x:t.clientX-r.left-_cropRect.x, y:t.clientY-r.top-_cropRect.y}; };
+    canvas.ontouchmove = e=>{ e.preventDefault(); if(!_cropDrag)return; const t=e.touches[0]; const r=canvas.getBoundingClientRect(); _cropRect.x=t.clientX-r.left-_cropStart.x; _cropRect.y=t.clientY-r.top-_cropStart.y; _cropRect.x=Math.max(0,Math.min(_cropRect.x,canvas.width-_cropRect.w)); _cropRect.y=Math.max(0,Math.min(_cropRect.y,canvas.height-_cropRect.h)); drawCrop(); };
+    canvas.ontouchend = ()=>{ _cropDrag=false; };
+    canvas.onmousedown = e=>{ const r=canvas.getBoundingClientRect(); _cropDrag=true; _cropStart={x:e.clientX-r.left-_cropRect.x,y:e.clientY-r.top-_cropRect.y}; };
+    canvas.onmousemove = e=>{ if(!_cropDrag)return; const r=canvas.getBoundingClientRect(); _cropRect.x=e.clientX-r.left-_cropStart.x; _cropRect.y=e.clientY-r.top-_cropStart.y; _cropRect.x=Math.max(0,Math.min(_cropRect.x,canvas.width-_cropRect.w)); _cropRect.y=Math.max(0,Math.min(_cropRect.y,canvas.height-_cropRect.h)); drawCrop(); };
+    canvas.onmouseup = ()=>{ _cropDrag=false; };
   };
-  img.src = imgCropData.originalImg;
+  img.src = src;
 }
-function removeProductImage(id){
-  if(!confirm("Remove image?")) return;
-  db.ref("shop_products/"+id+"/image").remove();
-  showNotif("🗑️ Image removed");
+
+function drawCrop(){
+  const c = document.getElementById("cropCanvas");
+  if(!_cropCtx||!_cropImg) return;
+  const scale = c.width/_cropImg.width;
+  _cropCtx.clearRect(0,0,c.width,c.height);
+  _cropCtx.drawImage(_cropImg,0,0,c.width,c.height);
+  // Darken outside
+  _cropCtx.fillStyle="rgba(0,0,0,0.5)";
+  _cropCtx.fillRect(0,0,c.width,c.height);
+  // Clear crop area
+  _cropCtx.clearRect(_cropRect.x,_cropRect.y,_cropRect.w,_cropRect.h);
+  _cropCtx.drawImage(_cropImg,
+    _cropRect.x/scale, _cropRect.y/scale, _cropRect.w/scale, _cropRect.h/scale,
+    _cropRect.x, _cropRect.y, _cropRect.w, _cropRect.h);
+  // Border
+  _cropCtx.strokeStyle="#FFD700"; _cropCtx.lineWidth=2;
+  _cropCtx.strokeRect(_cropRect.x,_cropRect.y,_cropRect.w,_cropRect.h);
+  // Corner handles
+  const hs=10, hc="#FFD700"; _cropCtx.fillStyle=hc;
+  [[0,0],[1,0],[0,1],[1,1]].forEach(([hx,hy])=>{_cropCtx.fillRect(_cropRect.x+hx*_cropRect.w-hs/2, _cropRect.y+hy*_cropRect.h-hs/2, hs, hs);});
 }
+
+function cropSizeChange(delta){
+  const c=document.getElementById("cropCanvas");
+  _cropRect.w=Math.max(50,Math.min(c.width,_cropRect.w+delta));
+  _cropRect.h=_cropRect.w; // keep square
+  _cropRect.x=Math.max(0,Math.min(_cropRect.x,c.width-_cropRect.w));
+  _cropRect.y=Math.max(0,Math.min(_cropRect.y,c.height-_cropRect.h));
+  drawCrop();
+}
+
+function closeCropModal(){ document.getElementById("cropModal").style.display="none"; }
+
+function saveCroppedImage(){
+  if(!_cropImg){showErr("No image!");return;}
+  const c=document.getElementById("cropCanvas");
+  const scale=c.width/_cropImg.width;
+  const out=document.createElement("canvas");
+  const size=300; out.width=size; out.height=size;
+  const ctx=out.getContext("2d");
+  ctx.drawImage(_cropImg,
+    _cropRect.x/scale, _cropRect.y/scale, _cropRect.w/scale, _cropRect.h/scale,
+    0, 0, size, size);
+  const compressed=out.toDataURL("image/jpeg",0.75);
+  closeCropModal();
+
+  if(_imgMode==="prod" && _imgProdId){
+    // Save directly to firebase product
+    db.ref("shop_products/"+_imgProdId+"/image").set(compressed);
+    showNotif("✅ Image saved!");
+  } else if(_imgMode==="add"){
+    // Preview in add modal
+    const pw=document.getElementById("pImgPreviewWrap");
+    const pi=document.getElementById("pImgPreview");
+    if(pw&&pi){ pw.style.display="block"; pi.src=compressed; window._addProdImg=compressed; }
+  } else if(_imgMode==="edit"){
+    // Preview in edit modal
+    const pw=document.getElementById("epImgPreviewWrap");
+    const pi=document.getElementById("epImgPreview");
+    if(pw&&pi){ pw.style.display="block"; pi.src=compressed; window._editProdImg=compressed; }
+  }
+}
+
+function clearAddProdImg(){ window._addProdImg=null; const pw=document.getElementById("pImgPreviewWrap"); if(pw)pw.style.display="none"; }
+function clearEditProdImg(){ window._editProdImg=null; const pw=document.getElementById("epImgPreviewWrap"); if(pw)pw.style.display="none"; }
+function removeProductImage(id){ if(!confirm("Remove image?"))return; db.ref("shop_products/"+id+"/image").remove(); showNotif("🗑️ Image removed"); }
 
 
 // AI ANALYSIS
@@ -482,49 +629,75 @@ function filterCat(cat){_filterCat=cat;renderProdsFiltered();}
 function onSearchInput(v){_srchQ=v;renderProdsFiltered();}
 // Track expanded products
 let expandedProds = {};
-function toggleProdExpand(id){ expandedProds[id]=!expandedProds[id]; renderProdsFiltered(); }
+function toggleProdExpand(id,e){ if(e)e.stopPropagation(); expandedProds[id]=!expandedProds[id]; renderProdsFiltered(); }
 
 function renderProdsFiltered(){
   const el=document.getElementById("prodListArea");if(!el)return;
   const q=_srchQ.toLowerCase();
-  const cf=products.filter(p=>{const mQ=p.name.toLowerCase().includes(q)||(p.category||"").toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q);const mC=!_filterCat||p.category===_filterCat;return mQ&&mC;});
+  const cf=products.filter(p=>{
+    const mQ=p.name.toLowerCase().includes(q)||(p.category||"").toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q);
+    const mC=!_filterCat||p.category===_filterCat;
+    return mQ&&mC;
+  });
   el.innerHTML=(cf.length===0?`<div style="text-align:center;padding:40px;color:var(--sub);">No products found</div>`:cf.map(p=>{
-    const min=p.minStock||5,sc=p.stock<=0?"s-zero":p.stock<=min?"s-low":"s-ok",sl=p.stock<=0?"Out of Stock":p.stock<=min?"⚠️ "+p.stock:p.stock+" "+(p.unit||"pcs"),profit=(p.sellPrice||0)-(p.buyPrice||0),icon=CI[p.category]||"📦";
+    const min=p.minStock||5;
+    const sc=p.stock<=0?"s-zero":p.stock<=min?"s-low":"s-ok";
+    const sl=p.stock<=0?"Out of Stock":p.stock<=min?"⚠️ Low":"OK";
+    const slColor=p.stock<=0?"var(--red)":p.stock<=min?"var(--gold2)":"var(--green)";
+    const profit=(p.sellPrice||0)-(p.buyPrice||0);
+    const icon=CI[p.category]||"📦";
     const isExp=!!expandedProds[p.id];
-    const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:140px;object-fit:cover;border-radius:0 0 10px 10px;" />`:"";
-    const detailHtml=isExp?`<div style="padding:8px 12px 10px;border-top:1px solid var(--border);">
+    const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>` :"";
+
+    const detailPanel=isExp?`<div style="padding:10px 12px 12px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
       ${imgHtml}
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;"><span style="color:var(--sub);">Buy Price</span><span>AED ${(p.buyPrice||0).toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;"><span style="color:var(--sub);">Sell Price</span><span style="color:var(--gold);">AED ${(p.sellPrice||0).toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;"><span style="color:var(--sub);">Profit/Unit</span><span style="color:${profit>=0?"var(--green)":"var(--red)"};">${profit>=0?"+":""}AED ${profit.toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;"><span style="color:var(--sub);">Category</span><span>${p.category||"Other"}</span></div>
-      ${p.barcode?`<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;"><span style="color:var(--sub);">Barcode</span><span>${p.barcode}</span></div>`:""}
-      ${p.notes?`<div style="font-size:11px;color:var(--sub);padding:4px 0;">📝 ${p.notes}</div>`:""}
-      <div style="display:flex;gap:6px;margin-top:10px;">
-        <button class="btn-sell" onclick="event.stopPropagation();openAddSale('${p.id}')" style="flex:1;">💸 Sell</button>
-        ${isEditor?`<button class="btn-ed" onclick="event.stopPropagation();openEditProduct('${p.id}')">✏️ Edit</button>`:""}
-        ${isEditor?`<button class="btn-dl" onclick="event.stopPropagation();deleteProduct('${p.id}')">🗑️</button>`:""}
-        ${isEditor?`<button onclick="event.stopPropagation();openImageUpload('${p.id}')" style="background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;">🖼️</button>`:""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--sub);">Buy Price</div>
+          <div style="font-size:14px;font-weight:700;">AED ${(p.buyPrice||0).toFixed(2)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--sub);">Sell Price</div>
+          <div style="font-size:14px;font-weight:700;color:var(--gold);">AED ${(p.sellPrice||0).toFixed(2)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--sub);">Profit/Unit</div>
+          <div style="font-size:14px;font-weight:700;color:${profit>=0?"var(--green)":"var(--red)"};">${profit>=0?"+":""}AED ${profit.toFixed(2)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--sub);">Stock</div>
+          <div style="font-size:14px;font-weight:700;color:${slColor};">${p.stock||0} ${p.unit||"pcs"}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px;">📂 ${p.category||"Other"} ${p.barcode?"· 🔖 "+p.barcode:""}</div>
+      ${p.notes?`<div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📝 ${p.notes}</div>`:""}
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:8px;padding:4px 8px;">
+          <button onclick="adjustStock('${p.id}',-1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">−</button>
+          <span style="font-size:14px;font-weight:700;min-width:24px;text-align:center;">${p.stock||0}</span>
+          <button onclick="adjustStock('${p.id}',1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">+</button>
+        </div>
+        <button class="btn-sell" onclick="openAddSale('${p.id}')" style="flex:1;">💸 Sell</button>
+        ${isEditor?`<button class="btn-ed" onclick="openEditProduct('${p.id}')">✏️</button>`:""}
+        ${isEditor?`<button onclick="openImageUpload('${p.id}')" style="background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;">🖼️</button>`:""}
+        ${isEditor?`<button class="btn-dl" onclick="deleteProduct('${p.id}')">🗑️</button>`:""}
       </div>
     </div>`:"";
-    return `<div class="product-card" onclick="toggleProdExpand('${p.id}')">
-      <div class="p-main">
+
+    return `<div class="product-card">
+      <div class="p-main" onclick="toggleProdExpand('${p.id}',event)" style="cursor:pointer;">
         <div class="p-icon">${p.image?`<img src="${p.image}" style="width:38px;height:38px;border-radius:10px;object-fit:cover;">`:icon}</div>
         <div class="p-info">
           <div class="p-name">${p.name}</div>
           <div class="p-sub">${p.category||"Other"}</div>
-          <div class="p-price">AED ${(p.sellPrice||0).toFixed(2)}${p.buyPrice?` <span style="color:${profit>=0?"var(--green)":"var(--red)"};font-size:11px;">${profit>=0?"+":""}AED ${profit.toFixed(2)}</span>`:""}</div>
+          <div class="p-price">AED ${(p.sellPrice||0).toFixed(2)} <span style="color:${profit>=0?"var(--green)":"var(--red)"};font-size:11px;">${profit>=0?"+":""}AED ${profit.toFixed(2)} profit</span></div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-          <span class="stock-badge ${sc}">${sl}</span>
-          <div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">
-            <button class="s-ctrl" style="display:inline-flex;" onclick="adjustStock('${p.id}',-1)">−</button>
-            <span style="font-size:13px;font-weight:700;min-width:20px;text-align:center;">${p.stock||0}</span>
-            <button class="s-ctrl" style="display:inline-flex;" onclick="adjustStock('${p.id}',1)">+</button>
-          </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+          <span class="stock-badge ${sc}" style="color:${slColor};">${p.stock||0} ${p.unit||"pcs"}</span>
+          <span style="color:var(--sub);font-size:16px;transform:rotate(${isExp?"180":"0"}deg);transition:transform 0.2s;display:block;">⌄</span>
         </div>
       </div>
-      ${detailHtml}
+      ${detailPanel}
     </div>`;
   }).join(""))+
   (isEditor?'<button class="add-btn" onclick="openAddProduct()">+ Add New Product</button>':"");
@@ -657,7 +830,14 @@ function manageModals(){document.getElementById("addProductModal").style.display
     <label>Category</label><select id="pCategory"></select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>Buy Price (AED)</label><input type="number" id="pBuyPrice" placeholder="0.00" min="0" step="0.01" oninput="updatePC()"/></div><div><label>Sell Price *</label><input type="number" id="pSellPrice" placeholder="0.00" min="0" step="0.01" oninput="updatePC()"/></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><label>Stock</label><input type="number" id="pStock" placeholder="0" min="0"/></div><div><label>Min Stock ⚠️</label><input type="number" id="pMinStock" placeholder="5" min="0"/></div><div><label>Unit</label><select id="pUnit"><option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option></select></div></div>
-    <label>Barcode</label><div style="display:flex;gap:8px;"><input type="text" id="pBarcode" placeholder="Optional" style="flex:1;"/><button onclick="openScanner('add')" style="background:var(--bg2);border:1px solid var(--blue);border-radius:10px;padding:10px 12px;color:var(--blue);font-size:16px;cursor:pointer;">📷</button></div>
+    <label>Barcode / SKU (optional)</label>
+    <input type="text" id="pBarcode" placeholder="Optional"/>
+    <label>Product Image</label>
+    <div id="pImgPreviewWrap" style="display:none;margin-bottom:6px;">
+      <img id="pImgPreview" style="width:100%;height:150px;object-fit:cover;border-radius:10px;border:1px solid var(--border);"/>
+      <button onclick="clearAddProdImg()" style="width:100%;margin-top:4px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px;color:var(--red);font-size:12px;cursor:pointer;">🗑️ Remove Image</button>
+    </div>
+    <button onclick="openImgPicker('add')" style="width:100%;background:rgba(124,77,255,0.15);border:1px dashed var(--blue);border-radius:10px;padding:12px;color:var(--blue);font-size:14px;cursor:pointer;">📷 Set Product Image (Camera / Gallery)</button>
     <label>Notes</label><textarea id="pNotes" placeholder="Optional..."></textarea>
     <div class="calc-box" id="productCalcBox"><div style="color:var(--sub);font-size:12px;text-align:center;">Enter prices to see margin</div></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeProductModal()">Cancel</button><button class="btn-primary" onclick="doAddProduct()">✅ Add Product</button></div>
@@ -672,7 +852,14 @@ function manageModals(){document.getElementById("addProductModal").style.display
     <label>Category</label><select id="epCategory"></select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label>Buy Price</label><input type="number" id="epBuyPrice" min="0" step="0.01" oninput="updateEPC()"/></div><div><label>Sell Price *</label><input type="number" id="epSellPrice" min="0" step="0.01" oninput="updateEPC()"/></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><label>Stock</label><input type="number" id="epStock" min="0"/></div><div><label>Min Stock ⚠️</label><input type="number" id="epMinStock" min="0"/></div><div><label>Unit</label><select id="epUnit"><option value="pcs">pcs</option><option value="m">meter</option><option value="set">set</option><option value="roll">roll</option><option value="box">box</option><option value="pair">pair</option></select></div></div>
-    <label>Barcode</label><div style="display:flex;gap:8px;"><input type="text" id="epBarcode" style="flex:1;"/><button onclick="openScanner('edit')" style="background:var(--bg2);border:1px solid var(--blue);border-radius:10px;padding:10px 12px;color:var(--blue);font-size:16px;cursor:pointer;">📷</button></div>
+    <label>Barcode / SKU (optional)</label>
+    <input type="text" id="epBarcode"/>
+    <label>Product Image</label>
+    <div id="epImgPreviewWrap" style="display:none;margin-bottom:6px;">
+      <img id="epImgPreview" style="width:100%;height:150px;object-fit:cover;border-radius:10px;border:1px solid var(--border);"/>
+      <button onclick="clearEditProdImg()" style="width:100%;margin-top:4px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px;color:var(--red);font-size:12px;cursor:pointer;">🗑️ Remove Image</button>
+    </div>
+    <button onclick="openImgPicker('edit')" style="width:100%;background:rgba(124,77,255,0.15);border:1px dashed var(--blue);border-radius:10px;padding:12px;color:var(--blue);font-size:14px;cursor:pointer;">📷 Set Product Image (Camera / Gallery)</button>
     <label>Notes</label><textarea id="epNotes"></textarea>
     <div class="calc-box" id="editProductCalcBox"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeProductModal()">Cancel</button><button class="btn-primary" onclick="doEditProduct()">✅ Save</button></div>
@@ -735,25 +922,6 @@ function manageModals(){document.getElementById("addProductModal").style.display
   </div>
 </div>
 
-
-<!-- IMAGE UPLOAD MODAL -->
-<div class="modal-bg" id="imgUploadModal" style="display:none;align-items:center;">
-  <div class="modal" style="border-radius:20px;margin:20px;">
-    <h3>🖼️ Product Image</h3>
-    <div style="text-align:center;margin-bottom:12px;">
-      <img id="imgPreview" style="display:none;width:100%;max-height:250px;object-fit:contain;border-radius:12px;border:1px solid var(--border);" />
-    </div>
-    <div id="imgCropArea" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--sub);text-align:center;">
-      ✂️ Image will be center-cropped to square
-    </div>
-    <label>Select Image</label>
-    <input type="file" accept="image/*" onchange="handleImageFile(this)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);font-size:14px;outline:none;"/>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeImageModal()">Cancel</button>
-      <button id="imgSaveBtn" class="btn-primary" onclick="saveProductImage()" style="display:none;">✅ Save Image</button>
-    </div>
-  </div>
-</div>
 
 <!-- SCANNER -->
 <div id="scanModal" style="display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
