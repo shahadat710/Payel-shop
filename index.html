@@ -260,10 +260,21 @@ function updatePC(){const b=parseFloat(document.getElementById("pby")?.value)||0
 function updateEPC(){const b=parseFloat(document.getElementById("epby")?.value)||0,s=parseFloat(document.getElementById("epsy")?.value)||0,p=s-b,m=s>0?((p/s)*100).toFixed(1):0;const e=document.getElementById("epcalc");if(e)e.innerHTML="<div class='cr'><span class='cl'>Buy</span><span>AED "+b.toFixed(2)+"</span></div><div class='cr'><span class='cl'>Sell</span><span>AED "+s.toFixed(2)+"</span></div><div class='cr'><span class='cl'>Profit</span><span class='"+(p>=0?"cg":"cr2")+"'>"+(p>=0?"+":"")+"AED "+p.toFixed(2)+"</span></div><div class='cr'><span class='cl'>Margin</span><span class='cgo'>"+m+"%</span></div>";}
 function toggleExp(id){expProds[id]=!expProds[id];const mc=document.getElementById("mc");if(mc&&curTab==="products")renderProds();}
 function setupPDD(){
-  const inp=document.getElementById("pn");const dd=document.getElementById("pnDD");if(!inp||!dd)return;
-  inp.oninput=function(){const q=this.value.toLowerCase();const ns=[...new Set(prods.map(p=>p.name))].filter(n=>n.toLowerCase().includes(q)&&q.length>0);if(!ns.length){dd.style.display="none";return;}dd.innerHTML=ns.slice(0,6).map(n=>"<div class='ddi' onmousedown='selPN(""+n.replace(/"/g,"&quot;")+"")'>"+n+"</div>").join("");dd.style.display="block";};
-  inp.onblur=()=>setTimeout(()=>{if(dd)dd.style.display="none";},200);
+  const inp=document.getElementById("pn");
+  const dd=document.getElementById("pnDD");
+  if(!inp||!dd)return;
+  inp.oninput=function(){
+    const q=this.value.toLowerCase();
+    const ns=[...new Set(prods.map(function(p){return p.name;}))].filter(function(n){return n.toLowerCase().includes(q)&&q.length>0;});
+    if(!ns.length){dd.style.display="none";return;}
+    let dhtml="";
+    ns.slice(0,6).forEach(function(n){dhtml+='<div class="ddi" onmousedown="selPN(this.textContent)">'+n+'</div>';});
+    dd.innerHTML=dhtml;
+    dd.style.display="block";
+  };
+  inp.onblur=function(){setTimeout(function(){if(dd)dd.style.display="none";},200);};
 }
+
 function selPN(name){const inp=document.getElementById("pn");if(inp)inp.value=name;const dd=document.getElementById("pnDD");if(dd)dd.style.display="none";const p=prods.find(x=>x.name===name);if(p){const fields={pcat:p.category,pby:p.buyPrice,psy:p.sellPrice,punit:p.unit,pmin:p.minStock};Object.entries(fields).forEach(([id,v])=>{const e=document.getElementById(id);if(e&&v){if(id==="pcat")e.innerHTML=catOpts(v);else e.value=v;}});updatePC();}}
 
 // IMAGE
@@ -299,7 +310,22 @@ function openAddPur(){if(!chkEd())return;addPO2=true;editPur=null;renderAll();se
 function openEditPur(id){if(!chkEd())return;editPur=purs.find(x=>x.id===id);if(!editPur)return;addPO2=true;renderAll();setTimeout(()=>{const p=editPur;document.getElementById("purMT").textContent="✏️ Edit Purchase";document.getElementById("purDate").value=p.date||"";document.getElementById("purSup").value=p.supplier||"";document.getElementById("purSupPh").value=(p.supPhone||"").replace("+971","");document.getElementById("purProd").value=p.productName||"";document.getElementById("purQty").value=p.qty||"";document.getElementById("purCost").value=p.cost||"";document.getElementById("purNotes").value=p.notes||"";updatePurC();setupPurDD();},60);}
 function closePur(){addPO2=false;editPur=null;renderAll();}
 function updatePurC(){const q=parseInt(document.getElementById("purQty")?.value)||0,c=parseFloat(document.getElementById("purCost")?.value)||0,t=q*c;const e=document.getElementById("purCalc");if(e)e.innerHTML="<div class='cr'><span class='cl'>Qty</span><span>"+q+"</span></div><div class='cr'><span class='cl'>Cost/Unit</span><span>AED "+c.toFixed(2)+"</span></div><div class='cr'><span class='cl cgo'>Total</span><span class='cgo'>AED "+t.toFixed(2)+"</span></div>";}
-function setupPurDD(){const inp=document.getElementById("purProd");const dd=document.getElementById("purProdDD");if(!inp||!dd)return;inp.oninput=function(){const q=this.value.toLowerCase();const ns=[...new Set(prods.map(p=>p.name).concat(purs.map(p=>p.productName||"")))].filter(n=>n&&n.toLowerCase().includes(q)&&q.length>0);if(!ns.length){dd.style.display="none";return;}dd.innerHTML=ns.slice(0,6).map(n=>"<div class='ddi' onmousedown='selPurN(""+n.replace(/"/g,"&quot;")+"")'>"+n+"</div>").join("");dd.style.display="block";};inp.onblur=()=>setTimeout(()=>{if(dd)dd.style.display="none";},200);}
+function setupPurDD(){
+  const inp=document.getElementById("purProd");
+  const dd=document.getElementById("purProdDD");
+  if(!inp||!dd)return;
+  inp.oninput=function(){
+    const q=this.value.toLowerCase();
+    const allNames=[...new Set(prods.map(function(p){return p.name;}).concat(purs.map(function(p){return p.productName||"";})))].filter(function(n){return n&&n.toLowerCase().includes(q)&&q.length>0;});
+    if(!allNames.length){dd.style.display="none";return;}
+    let dhtml="";
+    allNames.slice(0,6).forEach(function(n){dhtml+='<div class="ddi" onmousedown="selPurN(this.textContent)">'+n+'</div>';});
+    dd.innerHTML=dhtml;
+    dd.style.display="block";
+  };
+  inp.onblur=function(){setTimeout(function(){if(dd)dd.style.display="none";},200);};
+}
+
 function selPurN(n){const e=document.getElementById("purProd");if(e)e.value=n;const d=document.getElementById("purProdDD");if(d)d.style.display="none";const p=prods.find(x=>x.name===n);if(p&&p.buyPrice){const ce=document.getElementById("purCost");if(ce)ce.value=p.buyPrice;updatePurC();}}
 function savePur(){const dt=document.getElementById("purDate").value,sup=document.getElementById("purSup").value.trim(),spPh=document.getElementById("purSupPh").value.trim(),pn=document.getElementById("purProd").value.trim(),qty=parseInt(document.getElementById("purQty").value)||0,cost=parseFloat(document.getElementById("purCost").value)||0,notes=document.getElementById("purNotes").value.trim();if(!dt||!pn||qty<=0){showErr("Date, product & qty required!");return;}const tot=qty*cost,mk=dt.slice(0,7),supPhone=spPh?"+971"+spPh:"";if(editPur){db.ref("shop_purchases/"+editPur.id).set({...editPur,date:dt,supplier:sup,supPhone:supPhone,productName:pn,qty,cost,total:tot,notes,mk});showNotif("✅ Updated!");}else{const id="pu"+Date.now();db.ref("shop_purchases/"+id).set({id,date:dt,supplier:sup,supPhone:supPhone,productName:pn,qty,cost,total:tot,notes,mk,createdAt:new Date().toISOString()});showNotif("✅ Saved! AED "+tot.toFixed(2));}addPO2=false;editPur=null;renderAll();}
 function delPur(id){if(!confirm("Delete?"))return;db.ref("shop_purchases/"+id).remove();showNotif("🗑️ Deleted");}
