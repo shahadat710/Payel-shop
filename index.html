@@ -190,11 +190,9 @@ function renderStats(){
   if(sv("sv6"))sv("sv6").textContent=ot+" out";
 }
 
-function closeStockPopup(btn){
-  var el=btn;
-  while(el&&el.id!=="stockPopup")el=el.parentElement;
+function closeStockPopup(){
+  var el=document.getElementById("stockPopup");
   if(el)el.remove();
-  else document.getElementById("stockPopup")?.remove();
 }
 function showStock(t){
   const pp=t==="low"?prods.filter(p=>p.stock>0&&p.stock<=(p.minStock||5)):prods.filter(p=>(p.stock||0)===0);
@@ -211,7 +209,7 @@ function showStock(t){
     h+='<span style="font-size:13px;">'+p.name+'<br><span style="font-size:11px;color:var(--sub);">'+p.category+'</span></span>';
     h+='<span style="font-size:14px;font-weight:700;color:'+(p.stock<=0?"var(--red)":"var(--gold2)")+';"> '+p.stock+' '+(p.unit||"pcs")+'</span></div>';
   });
-  h+='<button onclick="document.getElementById('stockPopup').remove()" style="width:100%;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">Close</button>';
+  h+='<button onclick="closeStockPopup()" style="width:100%;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">Close</button>';
   h+='</div>';
   wrap.innerHTML=h;
   document.body.appendChild(wrap);
