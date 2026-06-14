@@ -151,6 +151,7 @@ function doView(){isVw=true;sessionStorage.setItem("sa","vw");document.getElemen
 function doLogout(){sessionStorage.removeItem("sa");isEd=false;isVw=false;location.reload();}
 function togglePass(){const e=document.getElementById("lpass");e.type=e.type==="password"?"text":"password";}
 function toggleEye(id){const e=document.getElementById(id);if(e)e.type=e.type==="password"?"text":"password";}
+function togglePass(){toggleEye('lpass');}
 function chkEd(){if(!isEd){showErr("View only!");return false;}return true;}
 function showNotif(m){const e=document.getElementById("notif");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",2500);}
 function showErr(m){const e=document.getElementById("nerr");e.textContent="❌ "+m;e.style.display="block";setTimeout(()=>e.style.display="none",2500);}
