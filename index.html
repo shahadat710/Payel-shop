@@ -394,25 +394,41 @@ function renderAll(){
 
 function renderProds(){
   const mc=document.getElementById("mc");if(!mc)return;
-  const q=srchQ.toLowerCase();
   const cats2=getCats();
-  let chips="";
-  // All button
-  chips+='<button onclick="setFilCat('')" style="flex-shrink:0;background:'+(filCat?"var(--bg2)":"linear-gradient(135deg,var(--gold),var(--gold2))")+';border:1px solid '+(filCat?"var(--border)":"var(--gold)")+';border-radius:20px;padding:4px 12px;color:'+(filCat?"var(--sub)":"#1A0533")+';font-size:11px;font-weight:700;cursor:pointer;">All</button>';
-  cats2.forEach(function(c){
-    const act=filCat===c;
-    chips+='<button onclick="setFilCat(''+c+'')" style="flex-shrink:0;background:'+(act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)")+';border:1px solid '+(act?"var(--gold)":"var(--border)")+';border-radius:20px;padding:4px 12px;color:'+(act?"#1A0533":"var(--sub)")+';font-size:11px;font-weight:700;cursor:pointer;">'+c+'</button>';
-  });
   let html='<div class="sw"><div class="si"><span class="sico">🔍</span>';
   html+='<input class="sinp" id="srchInp" type="text" placeholder="Search products..." value="'+srchQ+'" oninput="srchQ=this.value;renderProdsOnly()" autocomplete="off" autocorrect="off" autocapitalize="off"/>';
   html+='</div></div>';
-  html+='<div style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;">'+chips;
-  if(isEd)html+='<button onclick="openCatM()" style="flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;">⚙️</button>';
-  html+='</div><div class="ca" id="prodListArea"></div>';
+  html+='<div id="catChips" style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;"></div>';
+  html+='<div class="ca" id="prodListArea"></div>';
   mc.innerHTML=html;
+  // Build cat chips using DOM
+  const chipsEl=document.getElementById("catChips");
+  if(chipsEl){
+    const allBtn=document.createElement("button");
+    allBtn.textContent="All";
+    allBtn.style.cssText="flex-shrink:0;background:"+(filCat?"var(--bg2)":"linear-gradient(135deg,var(--gold),var(--gold2))")+";border:1px solid "+(filCat?"var(--border)":"var(--gold)")+";border-radius:20px;padding:4px 12px;color:"+(filCat?"var(--sub)":"#1A0533")+";font-size:11px;font-weight:700;cursor:pointer;";
+    allBtn.onclick=function(){filCat="";renderProds();};
+    chipsEl.appendChild(allBtn);
+    cats2.forEach(function(c){
+      const btn=document.createElement("button");
+      btn.textContent=c;
+      const act=filCat===c;
+      btn.style.cssText="flex-shrink:0;background:"+(act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)")+";border:1px solid "+(act?"var(--gold)":"var(--border)")+";border-radius:20px;padding:4px 12px;color:"+(act?"#1A0533":"var(--sub)")+";font-size:11px;font-weight:700;cursor:pointer;";
+      btn.onclick=function(){filCat=c;renderProds();};
+      chipsEl.appendChild(btn);
+    });
+    if(isEd){
+      const catBtn=document.createElement("button");
+      catBtn.textContent="⚙️";
+      catBtn.style.cssText="flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;";
+      catBtn.onclick=openCatM;
+      chipsEl.appendChild(catBtn);
+    }
+  }
   renderProdsOnly();
 }
 function setFilCat(c){filCat=c;renderProds();}
+
 function renderProdsOnly(){
   const el=document.getElementById("prodListArea");if(!el)return;
   const q=srchQ.toLowerCase();
