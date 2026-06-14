@@ -384,7 +384,7 @@ function renderAll(){
   if(!isEd&&!isVw)return;
   renderStats();renderDate();
   const mc=document.getElementById("mc");if(!mc)return;
-  if(curTab==="products")renderProds();
+  if(curTab==="products"){if(document.getElementById("prodListArea"))renderProdsOnly();else renderProds();}
   else if(curTab==="sales")renderSales2();
   else if(curTab==="purchase")renderPurs();
   else if(curTab==="dues")renderDues2();
@@ -396,22 +396,78 @@ function renderProds(){
   const mc=document.getElementById("mc");if(!mc)return;
   const q=srchQ.toLowerCase();
   const cats2=getCats();
-  // Chips
-  let chips="<button onclick='filCat="";renderProds()' style='flex-shrink:0;background:"+(filCat?"var(--bg2)":"linear-gradient(135deg,var(--gold),var(--gold2))")+";border:1px solid "+(filCat?"var(--border)":"var(--gold)")+";border-radius:20px;padding:4px 12px;color:"+(filCat?"var(--sub)":"#1A0533")+";font-size:11px;font-weight:700;cursor:pointer;'>All</button>";
-  cats2.forEach(function(c){const act=filCat===c;chips+="<button onclick='filCat=""+c+"";renderProds()' style='flex-shrink:0;background:"+(act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)")+";border:1px solid "+(act?"var(--gold)":"var(--border)")+";border-radius:20px;padding:4px 12px;color:"+(act?"#1A0533":"var(--sub)")+";font-size:11px;font-weight:700;cursor:pointer;'>"+c+"</button>";});
-  let html="<div class='sw'><div class='si'><span class='sico'>🔍</span><input class='sinp' id='srchInp' type='text' placeholder='Search products...' value='"+srchQ+"' oninput='srchQ=this.value;renderProds()' autocomplete='off' autocorrect='off' autocapitalize='off'/></div></div>";
-  html+="<div style='padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;'>"+chips;
-  if(isEd)html+="<button onclick='openCatM()' style='flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;'>⚙️</button>";
-  html+="</div><div class='ca'>";
-  const cf=prods.filter(function(p){return(p.name.toLowerCase().includes(q)||(p.category||"").toLowerCase().includes(q))&&(!filCat||p.category===filCat);});
-  if(!cf.length){html+="<div style='text-align:center;padding:40px;color:var(--sub);'>No products found</div>";}
-  else{cf.forEach(function(p){const mn=p.minStock||5,isL=p.stock>0&&p.stock<=mn,isO=p.stock<=0,sc=isO?"sot":isL?"slw":"sok",sl=isO?"Out of Stock":isL?"⚠️ "+p.stock:p.stock+" "+(p.unit||"pcs"),pft=(p.sellPrice||0)-(p.buyPrice||0),icon=CI[p.category]||"📦",isEx=!!expProds[p.id],imgT=p.image?"<img src='"+p.image+"' style='width:38px;height:38px;border-radius:10px;object-fit:cover;'>":icon;
-  html+="<div class='pc'><div class='pm' onclick='toggleExp(""+p.id+"")' style='cursor:pointer;'><div class='pi'>"+imgT+"</div><div class='pn'><div class='pnm'>"+p.name+"</div><div class='psc'>"+(p.category||"Other")+"</div><div class='ppr'>AED "+(p.sellPrice||0).toFixed(2)+(p.buyPrice?" <span style='color:"+(pft>=0?"var(--green)":"var(--red)")+"'>"+(pft>=0?"+":"")+"AED "+pft.toFixed(2)+"</span>":"")+"</div></div><div style='display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;'><span class='sbg "+sc+"'>"+sl+"</span><span style='color:var(--sub);font-size:18px;transform:rotate("+(isEx?"180":"0")+"deg);display:block;'>⌄</span></div></div>";
-  if(isEx){html+="<div class='pd' onclick='event.stopPropagation()'>";if(p.image)html+="<img src='"+p.image+"' style='width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px;'/>";html+="<div class='pg'><div class='pgb'><div class='pgl'>Buy Price</div><div class='pgv'>AED "+(p.buyPrice||0).toFixed(2)+"</div></div><div class='pgb'><div class='pgl'>Sell Price</div><div class='pgv' style='color:var(--gold);'>AED "+(p.sellPrice||0).toFixed(2)+"</div></div><div class='pgb'><div class='pgl'>Profit</div><div class='pgv' style='color:"+(pft>=0?"var(--green)":"var(--red)")+"'>"+(pft>=0?"+":"")+"AED "+pft.toFixed(2)+"</div></div><div class='pgb'><div class='pgl'>Stock</div><div class='pgv' style='color:"+(isO?"var(--red)":isL?"var(--gold2)":"var(--green)")+"'>"+(p.stock||0)+" "+(p.unit||"pcs")+"</div></div></div>";html+="<div style='font-size:12px;color:var(--sub);margin-bottom:4px;'>📂 "+(p.category||"Other")+(p.barcode?" · 🔖 "+p.barcode:"")+"</div>";if(p.notes)html+="<div style='font-size:11px;color:var(--sub);margin-bottom:8px;'>📝 "+p.notes+"</div>";html+="<div style='display:flex;gap:6px;margin-top:8px;align-items:center;'><div style='display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:8px;padding:4px 8px;'><button onclick="adjSt('"+p.id+"',-1)" style='background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;'>−</button><span style='font-size:14px;font-weight:700;min-width:24px;text-align:center;'>"+(p.stock||0)+"</span><button onclick="adjSt('"+p.id+"',1)" style='background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;'>+</button></div><button onclick="openAddS('"+p.id+"')" class='bp' style='flex:1;padding:8px;'>💸 Sell</button>";if(isEd){html+="<button onclick="openEditP('"+p.id+"')" style='background:var(--bg2);border:none;border-radius:8px;padding:6px 8px;color:var(--sub);font-size:13px;cursor:pointer;'>✏️</button>";html+="<button onclick="openImgPicker('prod','"+p.id+"')" style='background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;'>🖼️</button>";html+="<button onclick="delP('"+p.id+"')" style='background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 8px;color:var(--red);font-size:13px;cursor:pointer;'>🗑️</button>";}html+="</div></div>";}
-  html+="</div>";});}
-  if(isEd)html+="<button class='ab' onclick='openAddP()'>+ Add New Product</button>";
-  html+="</div>";
+  let chips="";
+  // All button
+  chips+='<button onclick="setFilCat('')" style="flex-shrink:0;background:'+(filCat?"var(--bg2)":"linear-gradient(135deg,var(--gold),var(--gold2))")+';border:1px solid '+(filCat?"var(--border)":"var(--gold)")+';border-radius:20px;padding:4px 12px;color:'+(filCat?"var(--sub)":"#1A0533")+';font-size:11px;font-weight:700;cursor:pointer;">All</button>';
+  cats2.forEach(function(c){
+    const act=filCat===c;
+    chips+='<button onclick="setFilCat(''+c+'')" style="flex-shrink:0;background:'+(act?"linear-gradient(135deg,var(--gold),var(--gold2))":"var(--bg2)")+';border:1px solid '+(act?"var(--gold)":"var(--border)")+';border-radius:20px;padding:4px 12px;color:'+(act?"#1A0533":"var(--sub)")+';font-size:11px;font-weight:700;cursor:pointer;">'+c+'</button>';
+  });
+  let html='<div class="sw"><div class="si"><span class="sico">🔍</span>';
+  html+='<input class="sinp" id="srchInp" type="text" placeholder="Search products..." value="'+srchQ+'" oninput="srchQ=this.value;renderProdsOnly()" autocomplete="off" autocorrect="off" autocapitalize="off"/>';
+  html+='</div></div>';
+  html+='<div style="padding:4px 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;">'+chips;
+  if(isEd)html+='<button onclick="openCatM()" style="flex-shrink:0;background:rgba(124,77,255,0.15);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;">⚙️</button>';
+  html+='</div><div class="ca" id="prodListArea"></div>';
   mc.innerHTML=html;
+  renderProdsOnly();
+}
+function setFilCat(c){filCat=c;renderProds();}
+function renderProdsOnly(){
+  const el=document.getElementById("prodListArea");if(!el)return;
+  const q=srchQ.toLowerCase();
+  const cf=prods.filter(function(p){return(p.name.toLowerCase().includes(q)||(p.category||"").toLowerCase().includes(q))&&(!filCat||p.category===filCat);});
+  let html="";
+  if(!cf.length){html='<div style="text-align:center;padding:40px;color:var(--sub);">No products found</div>';}
+  else{cf.forEach(function(p){
+    const mn=p.minStock||5,isL=p.stock>0&&p.stock<=mn,isO=p.stock<=0;
+    const sc=isO?"sot":isL?"slw":"sok";
+    const sl=isO?"Out of Stock":isL?"⚠️ "+p.stock:p.stock+" "+(p.unit||"pcs");
+    const pft=(p.sellPrice||0)-(p.buyPrice||0);
+    const icon=CI[p.category]||"📦";
+    const isEx=!!expProds[p.id];
+    const imgT=p.image?'<img src="'+p.image+'" style="width:38px;height:38px;border-radius:10px;object-fit:cover;">':icon;
+    html+='<div class="pc">';
+    html+='<div class="pm" onclick="toggleExp(''+p.id+'')" style="cursor:pointer;">';
+    html+='<div class="pi">'+imgT+'</div>';
+    html+='<div class="pn"><div class="pnm">'+p.name+'</div>';
+    html+='<div class="psc">'+(p.category||"Other")+'</div>';
+    html+='<div class="ppr">AED '+(p.sellPrice||0).toFixed(2);
+    if(p.buyPrice)html+=' <span style="color:'+(pft>=0?"var(--green)":"var(--red)")+';">'+(pft>=0?"+":"")+"AED "+pft.toFixed(2)+'</span>';
+    html+='</div></div>';
+    html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">';
+    html+='<span class="sbg '+sc+'">'+sl+'</span>';
+    html+='<span style="color:var(--sub);font-size:18px;transform:rotate('+(isEx?"180":"0")+'deg);display:block;">⌄</span>';
+    html+='</div></div>';
+    if(isEx){
+      html+='<div class="pd" onclick="event.stopPropagation()">';
+      if(p.image)html+='<img src="'+p.image+'" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>';
+      html+='<div class="pg">';
+      html+='<div class="pgb"><div class="pgl">Buy Price</div><div class="pgv">AED '+(p.buyPrice||0).toFixed(2)+'</div></div>';
+      html+='<div class="pgb"><div class="pgl">Sell Price</div><div class="pgv" style="color:var(--gold);">AED '+(p.sellPrice||0).toFixed(2)+'</div></div>';
+      html+='<div class="pgb"><div class="pgl">Profit</div><div class="pgv" style="color:'+(pft>=0?"var(--green)":"var(--red)")+';">'+(pft>=0?"+":"")+"AED "+pft.toFixed(2)+'</div></div>';
+      html+='<div class="pgb"><div class="pgl">Stock</div><div class="pgv" style="color:'+(isO?"var(--red)":isL?"var(--gold2)":"var(--green)")+';">'+(p.stock||0)+' '+(p.unit||"pcs")+'</div></div>';
+      html+='</div>';
+      html+='<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">📂 '+(p.category||"Other")+(p.barcode?" · 🔖 "+p.barcode:"")+'</div>';
+      if(p.notes)html+='<div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📝 '+p.notes+'</div>';
+      html+='<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">';
+      html+='<div style="display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:8px;padding:4px 8px;">';
+      html+='<button onclick="adjSt(''+p.id+'',-1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">−</button>';
+      html+='<span style="font-size:14px;font-weight:700;min-width:24px;text-align:center;">'+(p.stock||0)+'</span>';
+      html+='<button onclick="adjSt(''+p.id+'',1)" style="background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;width:24px;">+</button>';
+      html+='</div>';
+      html+='<button onclick="openAddS(''+p.id+'')" class="bp" style="flex:1;padding:8px;">💸 Sell</button>';
+      if(isEd){
+        html+='<button onclick="openEditP(''+p.id+'')" style="background:var(--bg2);border:none;border-radius:8px;padding:6px 8px;color:var(--sub);font-size:13px;cursor:pointer;">✏️</button>';
+        html+='<button onclick="openImgPicker('prod',''+p.id+'')" style="background:rgba(124,77,255,0.2);border:1px solid var(--blue);border-radius:8px;padding:6px 8px;color:var(--blue);font-size:13px;cursor:pointer;">🖼️</button>';
+        html+='<button onclick="delP(''+p.id+'')" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.4);border-radius:8px;padding:6px 8px;color:var(--red);font-size:13px;cursor:pointer;">🗑️</button>';
+      }
+      html+='</div></div>';
+    }
+    html+='</div>';
+  });}
+  if(isEd)html+='<button class="ab" onclick="openAddP()">+ Add New Product</button>';
+  el.innerHTML=html;
 }
 
 function renderSales2(){
