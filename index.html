@@ -189,15 +189,31 @@ function renderStats(){
   if(sv("sv6"))sv("sv6").textContent=ot+" out";
 }
 
+function closeStockPopup(btn){
+  var el=btn;
+  while(el&&el.id!=="stockPopup")el=el.parentElement;
+  if(el)el.remove();
+  else document.getElementById("stockPopup")?.remove();
+}
 function showStock(t){
   const pp=t==="low"?prods.filter(p=>p.stock>0&&p.stock<=(p.minStock||5)):prods.filter(p=>(p.stock||0)===0);
   if(!pp.length){showNotif("None!");return;}
-  let h='<div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:flex-end;justify-content:center;" onclick="this.remove()">';
-  h+='<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:70vh;overflow-y:auto;" onclick="event.stopPropagation()">';
+  const old=document.getElementById("stockPopup");if(old)old.remove();
+  const wrap=document.createElement("div");
+  wrap.id="stockPopup";
+  wrap.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:flex-end;justify-content:center;";
+  wrap.onclick=function(e){if(e.target===wrap)wrap.remove();};
+  let h='<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:70vh;overflow-y:auto;">';
   h+='<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:12px;">'+(t==="low"?"⚠️ Low Stock":"🔴 Out of Stock")+'</div>';
-  pp.forEach(p=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg);"><span style="font-size:13px;">'+p.name+'<br><span style="font-size:11px;color:var(--sub);">'+p.category+'</span></span><span style="font-size:14px;font-weight:700;color:'+(p.stock<=0?"var(--red)":"var(--gold2)")+';"> '+p.stock+' '+(p.unit||"pcs")+'</span></div>';});
-  h+='<button onclick="this.closest('div[onclick]').remove()" style="width:100%;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">Close</button></div></div>';
-  document.body.insertAdjacentHTML("beforeend",h);
+  pp.forEach(function(p){
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg);">';
+    h+='<span style="font-size:13px;">'+p.name+'<br><span style="font-size:11px;color:var(--sub);">'+p.category+'</span></span>';
+    h+='<span style="font-size:14px;font-weight:700;color:'+(p.stock<=0?"var(--red)":"var(--gold2)")+';"> '+p.stock+' '+(p.unit||"pcs")+'</span></div>';
+  });
+  h+='<button onclick="document.getElementById('stockPopup').remove()" style="width:100%;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--sub);font-size:14px;cursor:pointer;">Close</button>';
+  h+='</div>';
+  wrap.innerHTML=h;
+  document.body.appendChild(wrap);
 }
 
 // PRODUCTS
