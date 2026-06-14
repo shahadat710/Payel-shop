@@ -121,7 +121,7 @@ firebase.initializeApp({apiKey:"AIzaSyBji9ny612NL9KLvLvnA-Uc8OsKZOklBxI",authDom
 const db=firebase.database();
 
 // STATE
-let PASS="payel123", isEd=false, isVw=false, curTab="products";
+let PASS="payel123", PASS_LOADED=false, isEd=false, isVw=false, curTab="products";
 let prods=[], sales=[], dues=[], purs=[], cats=[];
 let selY=new Date().getFullYear(), selM=new Date().getMonth()+1;
 let expProds={}, purExp={}, purFil="all", srchQ="", filCat="";
@@ -131,6 +131,7 @@ const DC=["LED Strip","Bulb","Ceiling Light","Wall Light","Spotlight","Chandelie
 const CI={"LED Strip":"💡","Bulb":"💡","Ceiling Light":"🔆","Wall Light":"🕯️","Spotlight":"🔦","Chandelier":"✨","Outdoor Light":"🌟","Switch & Socket":"🔌","Cable & Wire":"🔋","Accessories":"🛒","Other":"📦"};
 
 // Firebase listeners
+db.ref("shop_settings/password").once("value",s=>{if(s.val())PASS=s.val();PASS_LOADED=true;}).catch(()=>{PASS_LOADED=true;});
 db.ref("shop_settings/password").on("value",s=>{if(s.val())PASS=s.val();});
 db.ref("shop_categories").on("value",s=>{cats=s.val()?Object.values(s.val()):[];if(!cats.length){DC.forEach(c=>{const id="c"+Date.now()+Math.random().toString(36).slice(2,4);db.ref("shop_categories/"+id).set({id,name:c});});}renderAll();const cl=document.getElementById("catList");if(cl)rCatList();});
 db.ref("shop_products").on("value",s=>{prods=s.val()?Object.values(s.val()):[];renderAll();});
@@ -144,10 +145,27 @@ if(sessionStorage.getItem("sa")==="vw"){isVw=true;document.getElementById("ls").
 // AUTH
 function doLogin(){
   const v=document.getElementById("lpass").value;
-  if(v===PASS||v==="payel123"){isEd=true;sessionStorage.setItem("sa","ed");document.getElementById("ls").style.display="none";renderAll();}
-  else{document.getElementById("le").style.display="block";}
+  const btn=document.querySelector(".lb");
+  // If password not yet loaded from Firebase, wait for it
+  if(!PASS_LOADED){
+    if(btn){btn.textContent="⏳ Loading...";btn.disabled=true;}
+    db.ref("shop_settings/password").once("value",s=>{
+      if(s.val())PASS=s.val();PASS_LOADED=true;
+      if(btn){btn.textContent="🔐 Login";btn.disabled=false;}
+      doLogin();
+    });
+    return;
+  }
+  if(v===PASS||v==="payel123"){
+    isEd=true;
+    sessionStorage.setItem("sa","ed");
+    document.getElementById("ls").style.display="none";
+    setTimeout(()=>renderAll(),50);
+  }else{
+    document.getElementById("le").style.display="block";
+  }
 }
-function doView(){isVw=true;sessionStorage.setItem("sa","vw");document.getElementById("ls").style.display="none";renderAll();}
+function doView(){isVw=true;sessionStorage.setItem("sa","vw");document.getElementById("ls").style.display="none";setTimeout(()=>renderAll(),50);}
 function doLogout(){sessionStorage.removeItem("sa");isEd=false;isVw=false;location.reload();}
 function togglePass(){const e=document.getElementById("lpass");e.type=e.type==="password"?"text":"password";}
 function toggleEye(id){const e=document.getElementById(id);if(e)e.type=e.type==="password"?"text":"password";}
@@ -665,7 +683,7 @@ function manMod(){
   if(editP){const e=document.getElementById("epcat");if(e&&!e.innerHTML)e.innerHTML=catOpts(editP.category||"");}
 }
 
-if(isEd||isVw)renderAll();
+if(isEd||isVw)setTimeout(()=>renderAll(),100);
 </script>
 
 <!-- HEADER -->
