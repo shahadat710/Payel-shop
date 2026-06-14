@@ -528,25 +528,80 @@ function renderProdsOnly(){
 
 function renderSales2(){
   const mc=document.getElementById("mc");if(!mc)return;
-  let ms=sales.filter(s=>s.mk===getM());
+  let ms=sales.filter(function(s){return s.mk===getM();});
   const td=new Date().toISOString().split("T")[0];
-  const fv=document.getElementById("sDateFil")?.value||"all";
-  if(fv==="today")ms=ms.filter(s=>s.date===td);
-  else if(fv==="week"){const w=new Date();w.setDate(w.getDate()-7);const ws=w.toISOString().split("T")[0];ms=ms.filter(s=>s.date>=ws);}
-  else if(fv==="custom"){const cv=document.getElementById("sDateCust")?.value;if(cv)ms=ms.filter(s=>s.date===cv);}
-  ms.sort((a,b)=>b.date.localeCompare(a.date));
-  const rev=ms.reduce((a,s)=>a+(s.total||0),0),pft=ms.reduce((a,s)=>a+(s.profit||0),0);
-  let h="<div style='padding:6px 12px 4px;display:flex;gap:6px;align-items:center;'>";
-  h+="<select id='sDateFil' onchange='renderSales2()' style='flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;-webkit-appearance:none;'><option value='all'>📅 All Month</option><option value='today'>📌 Today</option><option value='week'>📆 Last 7 Days</option><option value='custom'>🗓️ Custom</option></select>";
-  h+="<input type='date' id='sDateCust' onchange='renderSales2()' style='display:none;flex:1;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;'/></div>";
-  h+="<div style='padding:0 12px 4px;display:flex;gap:6px;'><div style='flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);'><div style='font-size:9px;color:var(--sub);'>Revenue</div><div style='font-size:14px;font-weight:800;color:var(--green);'>AED "+rev.toFixed(0)+"</div></div><div style='flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);'><div style='font-size:9px;color:var(--sub);'>Profit</div><div style='font-size:14px;font-weight:800;color:var(--blue);'>AED "+pft.toFixed(0)+"</div></div><div style='flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);'><div style='font-size:9px;color:var(--sub);'>Orders</div><div style='font-size:14px;font-weight:800;color:var(--gold);'>"+ms.length+"</div></div></div>";
-  h+="<div class='ca'>";
-  if(!ms.length){h+="<div style='text-align:center;padding:40px;color:var(--sub);'>No sales found</div>";}
-  else{ms.forEach(function(s){h+="<div class='sc'><div class='sdb'>"+(s.date?s.date.slice(5).replace("-","/"):"—")+"<br><span style='font-size:9px;color:var(--sub);'>"+(MN[(parseInt(s.date?.slice(5,7))||1)-1]||"")+"</span></div><div style='flex:1;'><div style='font-size:13px;font-weight:700;'>"+s.productName+"</div><div style='font-size:11px;color:var(--sub);'>"+s.qty+(s.customer?" · "+s.customer:"")+(s.phone?" · 📞"+s.phone:"")+" · "+s.payment+"</div>"+(s.notes?"<div style='font-size:10px;color:var(--sub);'>"+s.notes+"</div>":"")+"</div><div style='text-align:right;flex-shrink:0;'><div style='font-size:14px;font-weight:800;color:var(--green);'>AED "+(s.total||0).toFixed(2)+"</div><div style='font-size:10px;color:var(--blue);'>+"+(s.profit||0).toFixed(2)+"</div>"+(s.payment==="due"?"<div style='font-size:10px;color:var(--gold2);font-weight:700;'>⚠️ Due</div>":"")+"<div style='display:flex;gap:3px;margin-top:3px;justify-content:flex-end;'>"+(s.payment==="due"?"<button onclick="sendWA('sale','"+s.id+"')" style='background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;'>💬</button>":"")+(isEd?"<button onclick="openEditS('"+s.id+"')" style='background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;'>✏️</button>":"")+(isEd?"<button onclick="delS('"+s.id+"')" style='background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;'>🗑️</button>":"")+"</div></div></div>";});}
-  if(isEd)h+="<button class='ab' onclick='openAddS()'>+ Add New Sale</button>";
-  h+="</div>";
-  mc.innerHTML=h;
-  setTimeout(function(){const fs=document.getElementById("sDateFil");const ci=document.getElementById("sDateCust");if(fs&&ci)ci.style.display=fs.value==="custom"?"block":"none";},10);
+  mc.innerHTML="";
+
+  // Filter row
+  const frow=document.createElement("div");
+  frow.style.cssText="padding:6px 12px 4px;display:flex;gap:6px;align-items:center;";
+  const fsel=document.createElement("select");
+  fsel.id="sDateFil";
+  fsel.style.cssText="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;-webkit-appearance:none;";
+  [["all","📅 All Month"],["today","📌 Today"],["week","📆 Last 7 Days"],["custom","🗓️ Custom"]].forEach(function(o){
+    const opt=document.createElement("option");opt.value=o[0];opt.textContent=o[1];fsel.appendChild(opt);
+  });
+  const finp=document.createElement("input");
+  finp.type="date";finp.id="sDateCust";
+  finp.style.cssText="display:none;flex:1;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:9px;color:var(--text);font-size:12px;outline:none;";
+  fsel.onchange=function(){
+    finp.style.display=fsel.value==="custom"?"block":"none";
+    renderSales2();
+  };
+  finp.onchange=function(){renderSales2();};
+  // Apply filter
+  const fv=fsel.value||"all";
+  if(fv==="today")ms=ms.filter(function(s){return s.date===td;});
+  else if(fv==="week"){const w=new Date();w.setDate(w.getDate()-7);const ws=w.toISOString().split("T")[0];ms=ms.filter(function(s){return s.date>=ws;});}
+  else if(fv==="custom"&&finp.value)ms=ms.filter(function(s){return s.date===finp.value;});
+  ms.sort(function(a,b){return b.date.localeCompare(a.date);});
+  frow.appendChild(fsel);frow.appendChild(finp);mc.appendChild(frow);
+
+  // Stats
+  const rev=ms.reduce(function(a,s){return a+(s.total||0);},0);
+  const pft=ms.reduce(function(a,s){return a+(s.profit||0);},0);
+  const srow=document.createElement("div");
+  srow.style.cssText="padding:0 12px 4px;display:flex;gap:6px;";
+  [["Revenue","AED "+rev.toFixed(0),"var(--green)"],["Profit","AED "+pft.toFixed(0),"var(--blue)"],["Orders",ms.length,"var(--gold)"]].forEach(function(item){
+    const d=document.createElement("div");d.style.cssText="flex:1;background:var(--card);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);";
+    const l=document.createElement("div");l.style.cssText="font-size:9px;color:var(--sub);";l.textContent=item[0];
+    const v=document.createElement("div");v.style.cssText="font-size:14px;font-weight:800;color:"+item[2]+";";v.textContent=item[1];
+    d.appendChild(l);d.appendChild(v);srow.appendChild(d);
+  });
+  mc.appendChild(srow);
+
+  // Sales list
+  const ca=document.createElement("div");ca.className="ca";
+  if(!ms.length){
+    const empty=document.createElement("div");empty.style.cssText="text-align:center;padding:40px;color:var(--sub);";empty.textContent="No sales found";ca.appendChild(empty);
+  } else {
+    ms.forEach(function(s){
+      const card=document.createElement("div");card.className="sc";
+      // Date box
+      const db=document.createElement("div");db.className="sdb";
+      db.innerHTML=(s.date?s.date.slice(5).replace("-","/"):"—")+'<br><span style="font-size:9px;color:var(--sub);">'+(MN[(parseInt(s.date?.slice(5,7))||1)-1]||"")+"</span>";
+      card.appendChild(db);
+      // Info
+      const info=document.createElement("div");info.style.flex="1";
+      const nm=document.createElement("div");nm.style.cssText="font-size:13px;font-weight:700;";nm.textContent=s.productName;info.appendChild(nm);
+      const sub=document.createElement("div");sub.style.cssText="font-size:11px;color:var(--sub);";
+      sub.textContent=s.qty+(s.customer?" · "+s.customer:"")+(s.phone?" · 📞"+s.phone:"")+" · "+s.payment;info.appendChild(sub);
+      if(s.notes){const nt=document.createElement("div");nt.style.cssText="font-size:10px;color:var(--sub);";nt.textContent=s.notes;info.appendChild(nt);}
+      card.appendChild(info);
+      // Right
+      const rt=document.createElement("div");rt.style.cssText="text-align:right;flex-shrink:0;";
+      const amt=document.createElement("div");amt.style.cssText="font-size:14px;font-weight:800;color:var(--green);";amt.textContent="AED "+(s.total||0).toFixed(2);rt.appendChild(amt);
+      const pf=document.createElement("div");pf.style.cssText="font-size:10px;color:var(--blue);";pf.textContent="+"+(s.profit||0).toFixed(2);rt.appendChild(pf);
+      if(s.payment==="due"){const du=document.createElement("div");du.style.cssText="font-size:10px;color:var(--gold2);font-weight:700;";du.textContent="⚠️ Due";rt.appendChild(du);}
+      const btns=document.createElement("div");btns.style.cssText="display:flex;gap:3px;margin-top:3px;justify-content:flex-end;";
+      if(s.payment==="due"){const wb=document.createElement("button");wb.style.cssText="background:rgba(37,211,102,0.1);border:1px solid #25D366;border-radius:6px;padding:3px 7px;color:#25D366;font-size:12px;cursor:pointer;";wb.textContent="💬";wb.onclick=function(){sendWA("sale",s.id);};btns.appendChild(wb);}
+      if(isEd){const eb=document.createElement("button");eb.style.cssText="background:var(--bg2);border:none;border-radius:6px;padding:3px 7px;color:var(--sub);font-size:12px;cursor:pointer;";eb.textContent="✏️";eb.onclick=function(){openEditS(s.id);};btns.appendChild(eb);}
+      if(isEd){const db2=document.createElement("button");db2.style.cssText="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;";db2.textContent="🗑️";db2.onclick=function(){delS(s.id);};btns.appendChild(db2);}
+      rt.appendChild(btns);card.appendChild(rt);ca.appendChild(card);
+    });
+  }
+  if(isEd){const ab=document.createElement("button");ab.className="ab";ab.textContent="+ Add New Sale";ab.onclick=function(){openAddS();};ca.appendChild(ab);}
+  mc.appendChild(ca);
 }
 
 function renderPurs(){
